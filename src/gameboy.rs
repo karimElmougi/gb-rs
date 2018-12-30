@@ -28,7 +28,7 @@ impl Gameboy {
         let mut cycles_ellapsed = 0usize;
         for _ in (0..CYCLES_PER_SECOND).step_by(cycles_ellapsed) {
             cycles_ellapsed = self.cpu.step(&mut self.mmu);
-            self.mmu.tick(cycles_ellapsed as i32);
+            self.mmu.increment_counters(cycles_ellapsed as i32);
             self.gpu.step(cycles_ellapsed as i32);
             interrupts::isr(&mut self.cpu, &mut self.mmu);
         }

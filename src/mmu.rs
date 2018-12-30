@@ -70,7 +70,7 @@ impl MMU {
         self.write_byte(addr, (value>>8) as u8);
     }
 
-    pub fn tick(&mut self, cycles: i32) {
+    pub fn increment_counters(&mut self, cycles: i32) {
         self.divider_counter += cycles;
         if self.divider_counter >= 255 {
             self.divider_counter -= 255;
