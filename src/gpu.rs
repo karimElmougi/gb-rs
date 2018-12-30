@@ -1,17 +1,15 @@
-use super::mmu::MMU;
+use crate::mmu::MMU;
 
-pub struct GPU<'a> {
-    mmu: &'a mut MMU
+pub struct GPU {
 }
 
-pub fn new<'a>(mmu: &'a mut MMU) -> GPU {
+pub fn new() -> GPU {
     GPU {
-        mmu
     }
 }
 
-impl<'a> GPU<'a> {
-    pub fn step(cycles: u64) {
+impl GPU {
+    pub fn step(&mut self, cycles: i32) {
 
     }
 }

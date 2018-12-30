@@ -1,57 +1,56 @@
-use super::mmu::MMU;
-use super::gpu::GPU;
+use crate::mmu::MMU;
 
 pub struct CPU {
-    interrupts_enabled: bool,
-    enabling_interrupts: bool,
-    is_halted: bool,
-    a: u8, 
-    b: u8, 
-    c: u8, 
-    d: u8, 
-    e: u8, 
-    h: u8, 
-    l: u8, 
-    f: u8,
-    pc: u16, 
-    sp: u16,
-    mmu: MMU
+    A: u8, 
+    B: u8, 
+    C: u8, 
+    D: u8, 
+    E: u8, 
+    H: u8, 
+    L: u8, 
+    F: u8,
+    PC: u16, 
+    SP: u16,
 }
 
-pub fn new(mmu: MMU) -> CPU {
+pub fn new() -> CPU {
     CPU {
-        a: 1,
-        b: 0, 
-        c: 19,
-        d: 0,
-        e: 216,
-        h: 1,
-        l: 77,
-        f: 176,
-        pc: 0x100,
-        sp: 0xfffe,
-        interrupts_enabled: false,
-        enabling_interrupts: false,
-        is_halted: false,
-        mmu
+        A: 1,
+        B: 0, 
+        C: 19,
+        D: 0,
+        E: 216,
+        H: 1,
+        L: 77,
+        F: 176,
+        PC: 0x100,
+        SP: 0xfffe
     }
 }
 
 impl CPU {
-    pub fn step(&self) -> u64 {
-        if self.is_halted {
+    pub fn step(&self, mmu: &mut MMU) -> usize {
+        if mmu.is_halted {
             4
         } else{
-            let op_code = self.fetch_instruction();
+            let op_code = self.fetch_instruction(mmu);
             self.execute(op_code)
         }
     }
 
-    fn fetch_instruction(&self) -> u8 {
-        self.mmu.read_byte(self.pc)
+    pub fn call(&mut self, mmu: &mut MMU, addr: u16) {
+        self.SP -= 2;
+        mmu.write_word(self.SP, self.PC);
+        self.PC = addr;
     }
 
-    fn execute(&self, op_code: u8) -> u64 {
-        unimplemented!();
+    fn fetch_instruction(&self, mmu: &mut MMU) -> u8 {
+        mmu.read_byte(self.PC)
+    }
+
+    fn execute(&self, op_code: u8) -> usize {
+        match op_code {
+            _ => 0
+        }
     }
 }
