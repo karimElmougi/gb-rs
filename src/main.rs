@@ -1,8 +1,7 @@
 mod cartridge;
 mod mmu;
 mod gpu;
-mod cpu;
-mod interrupts;
+mod registers;
 mod gameboy;
 
 fn main() {

@@ -1,7 +1,6 @@
 use crate::cartridge::Cartridge;
-use crate::interrupts::INTERRUPT_FLAG_ADDR;
-use crate::interrupts::write_interrupt;
-use crate::interrupts::InterruptFlag;
+use crate::gameboy::INTERRUPT_FLAG_ADDR;
+use crate::gameboy::InterruptFlag;
 
 const DIVIDER_ADDR: u16 = 0xff04;
 const COUNTER_ADDR: u16 = 0xff05;
@@ -9,9 +8,6 @@ const MODULO_ADDR: u16 = 0xff06;
 const TIMER_CONTROL_ADDR: u16 = 0xff07;
 
 pub struct MMU {
-    pub interrupts_enabled: bool,
-    pub enabling_interrupts: bool,
-    pub is_halted: bool,
     memory: [u8;65536],
     cartridge: Box<Cartridge>,
     timer_counter: i32,
@@ -24,9 +20,6 @@ pub fn new(cartridge: Box<Cartridge>) -> MMU {
         cartridge,
         timer_counter: 1024,
         divider_counter: 0,
-        interrupts_enabled: false,
-        enabling_interrupts: false,
-        is_halted: false,
     }
 }
 
@@ -110,9 +103,14 @@ impl MMU {
             255 => {
                 let modulo = self.memory[MODULO_ADDR as usize];
                 self.write_byte(COUNTER_ADDR, modulo);
-                write_interrupt(self, InterruptFlag::TIMER);
+                self.write_interrupt(InterruptFlag::TIMER);
             },
             value => self.write_byte(COUNTER_ADDR, value+1)
         }
+    }
+
+    pub fn write_interrupt(&mut self, interrupt_signal: InterruptFlag) {
+        let flags = self.read_byte(INTERRUPT_FLAG_ADDR);
+        self.write_byte(INTERRUPT_FLAG_ADDR, flags|interrupt_signal as u8)
     }
 }

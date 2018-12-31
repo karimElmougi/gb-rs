@@ -1,5 +1,3 @@
-use crate::mmu::MMU;
-
 pub struct GPU {
 }
 
@@ -9,7 +7,7 @@ pub fn new() -> GPU {
 }
 
 impl GPU {
-    pub fn step(&mut self, cycles: i32) {
-
+    pub fn step(&mut self, _cycles: i32) {
+        unimplemented!();
     }
 }

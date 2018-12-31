@@ -1,36 +1,72 @@
+include!("interrupts.rs");
+include!("instructions/instructions.rs");
+include!("instructions/extended_instructions.rs");
+
 use crate::cartridge;
 use crate::mmu;
 use crate::gpu;
-use crate::cpu;
-use crate::interrupts;
+use crate::registers;
 
 const CYCLES_PER_SECOND: i32 = 4194304 / 60;
 
-pub struct Gameboy {
+pub struct GameBoy {
+    regs: registers::Registers,
+    interrupts_enabled: bool,
+    enabling_interrupts: bool,
+    is_halted: bool,
     mmu: mmu::MMU,
-    cpu: cpu::CPU,
     gpu: gpu::GPU
 }
 
-pub fn new(file_name: &str) -> Gameboy {
+pub fn new(file_name: &str) -> GameBoy {
     let mmu = mmu::new(Box::new(cartridge::new(file_name)));
-    let cpu = cpu::new();
+    let regs = registers::new();
     let gpu = gpu::new();
-    Gameboy {
+    GameBoy {
+        regs,
+        interrupts_enabled: false,
+        enabling_interrupts: false,
+        is_halted: false,
         mmu,
-        cpu, 
         gpu
     }
 }
 
-impl Gameboy {
+impl GameBoy {
     pub fn step(&mut self) {
         let mut cycles_ellapsed = 0usize;
         for _ in (0..CYCLES_PER_SECOND).step_by(cycles_ellapsed) {
-            cycles_ellapsed = self.cpu.step(&mut self.mmu);
+            cycles_ellapsed = self.step_cpu();
             self.mmu.increment_counters(cycles_ellapsed as i32);
             self.gpu.step(cycles_ellapsed as i32);
-            interrupts::isr(&mut self.cpu, &mut self.mmu);
+            self.isr();
         }
+    }
+
+    pub fn step_cpu(&mut self) -> usize {
+        if self.is_halted {
+            4
+        } else{
+            let op_code = self.fetch_byte();
+            self.execute(op_code)
+        }
+    }
+
+    pub fn call(&mut self, addr: u16) {
+        self.regs.sp -= 2;
+        self.mmu.write_word(self.regs.sp, self.regs.pc);
+        self.regs.pc = addr;
+    }
+
+    fn fetch_byte(&mut self) -> u8 {
+        let r = self.mmu.read_byte(self.regs.pc);
+        self.regs.pc += 1;
+        r
+    }
+
+    fn fetch_word(&mut self) -> u16 {
+        let r = self.mmu.read_word(self.regs.pc);
+        self.regs.pc += 2;
+        r
     }
 }
