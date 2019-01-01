@@ -1,7 +1,7 @@
 mod mbc0;
 
-use std::io::Read;
 use std::fs::File;
+use std::io::Read;
 
 pub trait Cartridge {
     fn read_rom(&self, addr: u16) -> u8;
@@ -12,10 +12,12 @@ pub trait Cartridge {
 
 pub fn new(rom_name: &str) -> impl Cartridge {
     let mut rom = vec![];
-    let _ = File::open(rom_name).expect("Could not read ROM file").read_to_end(&mut rom);
+    let _ = File::open(rom_name)
+        .expect("Could not read ROM file")
+        .read_to_end(&mut rom);
 
     match rom[0x147] {
         0x00 => mbc0::MBC0::new(rom),
-        _ => mbc0::MBC0::new(vec![0; 10])
+        _ => mbc0::MBC0::new(vec![0; 10]),
     }
 }

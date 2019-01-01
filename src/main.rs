@@ -1,8 +1,8 @@
 mod cartridge;
-mod mmu;
-mod gpu;
-mod registers;
 mod gameboy;
+mod gpu;
+mod mmu;
+mod registers;
 
 fn main() {
     let rom_name = "";

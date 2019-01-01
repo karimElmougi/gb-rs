@@ -1,9 +1,7 @@
-pub struct GPU {
-}
+pub struct GPU {}
 
 pub fn new() -> GPU {
-    GPU {
-    }
+    GPU {}
 }
 
 impl GPU {
