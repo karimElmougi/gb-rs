@@ -1,8 +1,6 @@
 impl GameBoy {
-    fn execute_cb(&mut self) -> usize {
+    fn execute_cb(&mut self) -> u8 {
         let op_code = self.fetch_byte();
-        match op_code {
-            _ => 0
-        }
+        0
     }
 }

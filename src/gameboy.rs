@@ -34,8 +34,8 @@ pub fn new(file_name: &str) -> GameBoy {
 
 impl GameBoy {
     pub fn step(&mut self) {
-        let mut cycles_ellapsed = 0usize;
-        for _ in (0..CYCLES_PER_SECOND).step_by(cycles_ellapsed) {
+        let mut cycles_ellapsed = 0u8;
+        for _ in (0..CYCLES_PER_SECOND).step_by(cycles_ellapsed as usize) {
             cycles_ellapsed = self.step_cpu();
             self.mmu.increment_counters(cycles_ellapsed as i32);
             self.gpu.step(cycles_ellapsed as i32);
@@ -43,7 +43,7 @@ impl GameBoy {
         }
     }
 
-    pub fn step_cpu(&mut self) -> usize {
+    pub fn step_cpu(&mut self) -> u8 {
         if self.is_halted {
             4
         } else{
@@ -58,6 +58,10 @@ impl GameBoy {
         self.regs.pc = addr;
     }
 
+    fn execute(&mut self, op_code: u8) -> u8 {
+        (INSTRUCTIONS[op_code as usize].f)(self)
+    }
+
     fn fetch_byte(&mut self) -> u8 {
         let r = self.mmu.read_byte(self.regs.pc);
         self.regs.pc += 1;
@@ -69,4 +73,28 @@ impl GameBoy {
         self.regs.pc += 2;
         r
     }
+}
+
+const CARRY: u8 = 0x10;
+const HALF_CARRY: u8 = 0x20;
+const SUB: u8 = 0x40;
+const ZERO: u8 = 0x80;
+
+fn add(op1: u8, op2: u8, f: u8) -> (u8, u8) {
+    add_impl(op1, op2, f, false)
+}
+
+fn addc(op1: u8, op2: u8, f: u8) -> (u8, u8) {
+    add_impl(op1, op2, f, true)
+}
+
+fn add_impl(op1: u8, op2: u8, f: u8, carrying: bool) -> (u8, u8) {
+    let carry = if carrying { ((f & CARRY) >> 4) as u16 } else { 0 };
+    let r16 = op1 as u16 + op2 as u16 + carry;
+    let r = r16 as u8;
+    let f = 0 
+        | if r == 0 {ZERO} else{ 0 }
+        | if r16 > 0xff {CARRY} else {0}
+        | if op1&0xf + op2+0xf + (carry as u8) > 0xf { HALF_CARRY } else { 0 };
+    (r, f)
 }
