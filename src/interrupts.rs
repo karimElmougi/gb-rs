@@ -7,15 +7,15 @@ pub enum InterruptFlag {
     LCD = 0x02,
     TIMER = 0x04,
     SERIAL = 0x08,
-    JOYPAD = 0x10
+    JOYPAD = 0x10,
 }
 
-const INTERRUPT_FLAGS: [InterruptFlag;5] = [
-    InterruptFlag::VBLANK, 
-    InterruptFlag::LCD, 
-    InterruptFlag::TIMER, 
-    InterruptFlag::SERIAL, 
-    InterruptFlag::JOYPAD
+const INTERRUPT_FLAGS: [InterruptFlag; 5] = [
+    InterruptFlag::VBLANK,
+    InterruptFlag::LCD,
+    InterruptFlag::TIMER,
+    InterruptFlag::SERIAL,
+    InterruptFlag::JOYPAD,
 ];
 
 impl GameBoy {
@@ -53,22 +53,23 @@ impl GameBoy {
             InterruptFlag::LCD => 0x48,
             InterruptFlag::TIMER => 0x50,
             InterruptFlag::SERIAL => 0x58,
-            InterruptFlag::JOYPAD => 0x60
+            InterruptFlag::JOYPAD => 0x60,
         };
         self.call(addr);
     }
 
     fn is_enabled(&self, interrupt_type: InterruptFlag) -> bool {
         let flag = interrupt_type as u8;
-        self.mmu.read_byte(INTERRUPTS_ENABLED_ADDR)&flag == flag
+        self.mmu.read_byte(INTERRUPTS_ENABLED_ADDR) & flag == flag
     }
 
     fn has_occured(&self, interrupt_type: InterruptFlag) -> bool {
         let flag = interrupt_type as u8;
-        self.mmu.read_byte(INTERRUPT_FLAG_ADDR)&flag == flag
+        self.mmu.read_byte(INTERRUPT_FLAG_ADDR) & flag == flag
     }
 
     fn is_ready(&self) -> bool {
-        (self.mmu.read_byte(INTERRUPT_FLAG_ADDR) & self.mmu.read_byte(INTERRUPTS_ENABLED_ADDR)) != 0x00
+        (self.mmu.read_byte(INTERRUPT_FLAG_ADDR) & self.mmu.read_byte(INTERRUPTS_ENABLED_ADDR))
+            != 0x00
     }
 }

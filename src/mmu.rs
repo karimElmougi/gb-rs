@@ -65,7 +65,7 @@ impl MMU {
 
     pub fn read_word(&self, addr: u16) -> u16 {
         let addr = addr as usize;
-        (self.memory[addr] | self.memory[addr + 1] << 8) as u16
+        ((self.memory[addr + 1] as u16) << 8) | self.memory[addr] as u16
     }
 
     pub fn write_word(&mut self, addr: u16, value: u16) {

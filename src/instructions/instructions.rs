@@ -3,18 +3,18 @@ const HALF_CARRY: u8 = 0b0010_0000;
 const SUB: u8 = 0b0100_0000;
 const ZERO: u8 = 0b1000_0000;
 
-const INSTRUCTIONS: [(&'static str, fn(&mut GameBoy)->u8); 10] = [
-    ("NOP", GameBoy::nop),                         // 0x01
-    ("LD BC, NN", GameBoy::ld_bc_nn),              // 0x02
-    ("LD (BC), A", GameBoy::ld_bc_a),              // 0x02
-    ("INC BC", GameBoy::inc_bc),                   // 0x03
-    ("INC B", GameBoy::inc_b),                   // 0x04
-    ("DEC B", GameBoy::dec_b),                   // 0x05
-    ("LD B, N", GameBoy::ld_b_n),                   // 0x06
-    ("RLCA", GameBoy::rlca),                   // 0x07
-    ("LD (NN), SP", GameBoy::ld_nn_sp),                   // 0x08
-    ("ADD HL, BC", GameBoy::add_hl_bc),                   // 0x09
-    // Instruction {_name: "CB N", f: GameBoy::execute_cb},        // 0xcd
+const INSTRUCTIONS: [(&'static str, fn(&mut GameBoy) -> u8); 10] = [
+    ("NOP", GameBoy::nop),              // 0x01
+    ("LD BC, NN", GameBoy::ld_bc_nn),   // 0x02
+    ("LD (BC), A", GameBoy::ld_bc_a),   // 0x02
+    ("INC BC", GameBoy::inc_bc),        // 0x03
+    ("INC B", GameBoy::inc_b),          // 0x04
+    ("DEC B", GameBoy::dec_b),          // 0x05
+    ("LD B, N", GameBoy::ld_b_n),       // 0x06
+    ("RLCA", GameBoy::rlca),            // 0x07
+    ("LD (NN), SP", GameBoy::ld_nn_sp), // 0x08
+    ("ADD HL, BC", GameBoy::add_hl_bc), // 0x09
+                                        // Instruction {_name: "CB N", f: GameBoy::execute_cb},        // 0xcd
 ];
 
 impl GameBoy {
@@ -91,7 +91,7 @@ impl GameBoy {
     }
 
     fn ld_nn_sp(&mut self) -> u8 {
-        let n = self.fetch_word(); 
+        let n = self.fetch_word();
         self.mmu.write_word(n, self.regs.sp);
         20
     }
@@ -146,7 +146,7 @@ impl GameBoy {
     }
 
     fn inc_bc(&mut self) -> u8 {
-        self.regs.set_bc(self.regs.get_bc()+1);
+        self.regs.set_bc(self.regs.get_bc() + 1);
         8
     }
 
@@ -215,9 +215,13 @@ fn dec_r(reg: u8, f: u8) -> (u8, u8) {
 
 fn add_16(op1: u16, op2: u16, f: u8) -> (u16, u8) {
     let r = op1 as u32 + op2 as u32;
-    let f = f & ZERO 
-            | if r > 0xffff { CARRY } else { 0 }
-            | if ((op1 & 0xfff) + (op2 & 0xfff)) > 0xfff { HALF_CARRY } else { 0 };
+    let f = f & ZERO
+        | if r > 0xffff { CARRY } else { 0 }
+        | if ((op1 & 0xfff) + (op2 & 0xfff)) > 0xfff {
+            HALF_CARRY
+        } else {
+            0
+        };
     (r as u16, f)
 }
 
@@ -230,11 +234,7 @@ fn addc(op1: u8, op2: u8, f: u8) -> (u8, u8) {
 }
 
 fn add_impl(op1: u8, op2: u8, f: u8, use_carry: bool) -> (u8, u8) {
-    let carry = if use_carry {
-        ((f & CARRY) >> 4)
-    } else {
-        0
-    };
+    let carry = if use_carry { ((f & CARRY) >> 4) } else { 0 };
     let r16 = op1 as u16 + op2 as u16 + carry as u16;
     let r = r16 as u8;
     let f = 0
@@ -257,16 +257,16 @@ fn subc(op1: u8, op2: u8, f: u8) -> (u8, u8) {
 }
 
 fn sub_impl(op1: u8, op2: u8, f: u8, use_borrow: bool) -> (u8, u8) {
-    let borrow = if use_borrow {
-        ((f & CARRY) >> 4)
-    } else {
-        0
-    };
+    let borrow = if use_borrow { ((f & CARRY) >> 4) } else { 0 };
     let r16 = op1 as u16 - op2 as u16 - borrow as u16;
     let r = r16 as u8;
-    let f = SUB 
+    let f = SUB
         | if r == 0 { ZERO } else { 0 }
         | if r16 > 0xff { CARRY } else { 0 }
-        | if (op1 & 0xf) - (op2 & 0xf) - borrow > 0xf { HALF_CARRY } else { 0 };
-    (r,f)
+        | if (op1 & 0xf) - (op2 & 0xf) - borrow > 0xf {
+            HALF_CARRY
+        } else {
+            0
+        };
+    (r, f)
 }
