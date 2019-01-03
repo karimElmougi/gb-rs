@@ -59,7 +59,7 @@ impl GameBoy {
     }
 
     fn execute(&mut self, op_code: u8) -> u8 {
-        (INSTRUCTIONS[op_code as usize].f)(self)
+        (INSTRUCTIONS[op_code as usize].1)(self)
     }
 
     fn fetch_byte(&mut self) -> u8 {
@@ -73,36 +73,4 @@ impl GameBoy {
         self.regs.pc += 2;
         r
     }
-}
-
-const CARRY: u8 = 0x10;
-const HALF_CARRY: u8 = 0x20;
-const SUB: u8 = 0x40;
-const ZERO: u8 = 0x80;
-
-fn add(op1: u8, op2: u8, f: u8) -> (u8, u8) {
-    add_impl(op1, op2, f, false)
-}
-
-fn addc(op1: u8, op2: u8, f: u8) -> (u8, u8) {
-    add_impl(op1, op2, f, true)
-}
-
-fn add_impl(op1: u8, op2: u8, f: u8, carrying: bool) -> (u8, u8) {
-    let carry = if carrying {
-        ((f & CARRY) >> 4) as u16
-    } else {
-        0
-    };
-    let r16 = op1 as u16 + op2 as u16 + carry;
-    let r = r16 as u8;
-    let f = 0
-        | if r == 0 { ZERO } else { 0 }
-        | if r16 > 0xff { CARRY } else { 0 }
-        | if (op1 & 0xf) + (op2 & 0xf) + (carry as u8) > 0xf {
-            HALF_CARRY
-        } else {
-            0
-        };
-    (r, f)
 }
