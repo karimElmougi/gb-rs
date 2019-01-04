@@ -3,7 +3,7 @@ const HALF_CARRY: u8 = 0b0010_0000;
 const SUB: u8 = 0b0100_0000;
 const ZERO: u8 = 0b1000_0000;
 
-const INSTRUCTIONS: [(&'static str, fn(&mut GameBoy) -> u8); 128] = [
+const INSTRUCTIONS: [(&'static str, fn(&mut GameBoy) -> u8); 192] = [
     ("NOP", GameBoy::nop),              // 0x01
     ("LD BC, NN", GameBoy::ld_bc_nn),   // 0x02
     ("LD (BC), A", GameBoy::ld_bc_a),   // 0x02
@@ -132,70 +132,70 @@ const INSTRUCTIONS: [(&'static str, fn(&mut GameBoy) -> u8); 128] = [
     ("LD A, L", GameBoy::ld_a_l),       // 0x7d
     ("LD A, (HL)", GameBoy::ld_a_hl),   // 0x7e
     ("LD A, A", GameBoy::ld_a_a),       // 0x7f
-    // ("ADD A, B", add_a_r, 4),          // 0x80
-    // ("ADD A, C", add_a_r, 4),          // 0x81
-    // ("ADD A, D", add_a_r, 4),          // 0x82
-    // ("ADD A, E", add_a_r, 4),          // 0x83
-    // ("ADD A, H", add_a_r, 4),          // 0x84
-    // ("ADD A, L", add_a_r, 4),          // 0x85
-    // ("ADD A, (HL)", add_a_hl, 8),        // 0x86
-    // ("ADD A", add_a_r, 4),             // 0x87
-    // ("ADC B", adc_a_r, 4),             // 0x88
-    // ("ADC C", adc_a_r, 4),             // 0x89
-    // ("ADC D", adc_a_r, 4),             // 0x8a
-    // ("ADC E", adc_a_r, 4),             // 0x8b
-    // ("ADC H", adc_a_r, 4),             // 0x8c
-    // ("ADC L", adc_a_r, 4),             // 0x8d
-    // ("ADC (HL)", adc_a_hl, 8),           // 0x8e
-    // ("ADC A", adc_a_r, 4),             // 0x8f
-    // ("SUB B", sub_a_r, 4),             // 0x90
-    // ("SUB C", sub_a_r, 4),             // 0x91
-    // ("SUB D", sub_a_r, 4),             // 0x92
-    // ("SUB E", sub_a_r, 4),             // 0x93
-    // ("SUB H", sub_a_r, 4),             // 0x94
-    // ("SUB L", sub_a_r, 4),             // 0x95
-    // ("SUB (HL)", sub_a_hl, 8),           // 0x96
-    // ("SUB A", sub_a_r, 4),             // 0x97
-    // ("SBC B", sbc_a_r, 4),             // 0x98
-    // ("SBC C", sbc_a_r, 4),             // 0x99
-    // ("SBC D", sbc_a_r, 4),             // 0x9a
-    // ("SBC E", sbc_a_r, 4),             // 0x9b
-    // ("SBC H", sbc_a_r, 4),             // 0x9c
-    // ("SBC L", sbc_a_r, 4),             // 0x9d
-    // ("SBC (HL)", sbc_a_hl, 8),           // 0x9e
-    // ("SBC A", sbc_a_r, 4),             // 0x9f
-    // ("AND B", and_a_r, 4),             // 0xa0
-    // ("AND C", and_a_r, 4),             // 0xa1
-    // ("AND D", and_a_r, 4),             // 0xa2
-    // ("AND E", and_a_r, 4),             // 0xa3
-    // ("AND H", and_a_r, 4),             // 0xa4
-    // ("AND L", and_a_r, 4),             // 0xa5
-    // ("AND (HL)", and_a_hl, 8),           // 0xa6
-    // ("AND A", and_a_r, 4),             // 0xa7
-    // ("XOR B", xor_a_r, 4),             // 0xa8
-    // ("XOR C", xor_a_r, 4),             // 0xa9
-    // ("XOR D", xor_a_r, 4),             // 0xaa
-    // ("XOR E", xor_a_r, 4),             // 0xab
-    // ("XOR H", xor_a_r, 4),             // 0xac
-    // ("XOR L", xor_a_r, 4),             // 0xad
-    // ("XOR (HL)", xor_a_hl, 8),           // 0xae
-    // ("XOR A", xor_a_r, 4),             // 0xaf
-    // ("OR B", or_a_r, 4),               // 0xb0
-    // ("OR C", or_a_r, 4),               // 0xb1
-    // ("OR D", or_a_r, 4),               // 0xb2
-    // ("OR E", or_a_r, 4),               // 0xb3
-    // ("OR H", or_a_r, 4),               // 0xb4
-    // ("OR L", or_a_r, 4),               // 0xb5
-    // ("OR (HL)", or_a_hl, 8),             // 0xb6
-    // ("OR A", or_a_r, 4),               // 0xb7
-    // ("CP B", cp_a_r, 4),               // 0xb8
-    // ("CP C", cp_a_r, 4),               // 0xb9
-    // ("CP D", cp_a_r, 4),               // 0xba
-    // ("CP E", cp_a_r, 4),               // 0xbb
-    // ("CP H", cp_a_r, 4),               // 0xbc
-    // ("CP L", cp_a_r, 4),               // 0xbd
-    // ("CP (HL)", cp_a_hl, 8),             // 0xbe
-    // ("CP A", cp_a_r, 4),               // 0xbf
+    ("ADD A, B", GameBoy::add_a_b),          // 0x80
+    ("ADD A, C", GameBoy::add_a_c),          // 0x81
+    ("ADD A, D", GameBoy::add_a_d),          // 0x82
+    ("ADD A, E", GameBoy::add_a_e),          // 0x83
+    ("ADD A, H", GameBoy::add_a_h),          // 0x84
+    ("ADD A, L", GameBoy::add_a_l),          // 0x85
+    ("ADD A, (HL)", GameBoy::add_a_hl),        // 0x86
+    ("ADD A", GameBoy::add_a_a),             // 0x87
+    ("ADC B", GameBoy::adc_a_b),             // 0x88
+    ("ADC C", GameBoy::adc_a_c),             // 0x89
+    ("ADC D", GameBoy::adc_a_d),             // 0x8a
+    ("ADC E", GameBoy::adc_a_e),             // 0x8b
+    ("ADC H", GameBoy::adc_a_h),             // 0x8c
+    ("ADC L", GameBoy::adc_a_l),             // 0x8d
+    ("ADC (HL)", GameBoy::adc_a_hl),           // 0x8e
+    ("ADC A", GameBoy::adc_a_a),             // 0x8f
+    ("SUB B", GameBoy::sub_a_b),             // 0x90
+    ("SUB C", GameBoy::sub_a_c),             // 0x91
+    ("SUB D", GameBoy::sub_a_d),             // 0x92
+    ("SUB E", GameBoy::sub_a_e),             // 0x93
+    ("SUB H", GameBoy::sub_a_h),             // 0x94
+    ("SUB L", GameBoy::sub_a_l),             // 0x95
+    ("SUB (HL)", GameBoy::sub_a_hl),           // 0x96
+    ("SUB A", GameBoy::sub_a_a),             // 0x97
+    ("SBC B", GameBoy::sbc_a_b),             // 0x98
+    ("SBC C", GameBoy::sbc_a_c),             // 0x99
+    ("SBC D", GameBoy::sbc_a_d),             // 0x9a
+    ("SBC E", GameBoy::sbc_a_e),             // 0x9b
+    ("SBC H", GameBoy::sbc_a_h),             // 0x9c
+    ("SBC L", GameBoy::sbc_a_l),             // 0x9d
+    ("SBC (HL)", GameBoy::sbc_a_hl),           // 0x9e
+    ("SBC A", GameBoy::sbc_a_a),             // 0x9f
+    ("AND B", GameBoy::and_a_b),             // 0xa0
+    ("AND C", GameBoy::and_a_c),             // 0xa1
+    ("AND D", GameBoy::and_a_d),             // 0xa2
+    ("AND E", GameBoy::and_a_e),             // 0xa3
+    ("AND H", GameBoy::and_a_h),             // 0xa4
+    ("AND L", GameBoy::and_a_l),             // 0xa5
+    ("AND (HL)", GameBoy::and_a_hl),           // 0xa6
+    ("AND A", GameBoy::and_a_a),             // 0xa7
+    ("XOR B", GameBoy::xor_a_b),             // 0xa8
+    ("XOR C", GameBoy::xor_a_c),             // 0xa9
+    ("XOR D", GameBoy::xor_a_d),             // 0xaa
+    ("XOR E", GameBoy::xor_a_e),             // 0xab
+    ("XOR H", GameBoy::xor_a_h),             // 0xac
+    ("XOR L", GameBoy::xor_a_l),             // 0xad
+    ("XOR (HL)", GameBoy::xor_a_hl),           // 0xae
+    ("XOR A", GameBoy::xor_a_a),             // 0xaf
+    ("OR B", GameBoy::or_a_b),               // 0xb0
+    ("OR C", GameBoy::or_a_c),               // 0xb1
+    ("OR D", GameBoy::or_a_d),               // 0xb2
+    ("OR E", GameBoy::or_a_e),               // 0xb3
+    ("OR H", GameBoy::or_a_h),               // 0xb4
+    ("OR L", GameBoy::or_a_l),               // 0xb5
+    ("OR (HL)", GameBoy::or_a_hl),             // 0xb6
+    ("OR A", GameBoy::or_a_a),               // 0xb7
+    ("CP B", GameBoy::cp_a_b),               // 0xb8
+    ("CP C", GameBoy::cp_a_c),               // 0xb9
+    ("CP D", GameBoy::cp_a_d),               // 0xba
+    ("CP E", GameBoy::cp_a_e),               // 0xbb
+    ("CP H", GameBoy::cp_a_h),               // 0xbc
+    ("CP L", GameBoy::cp_a_l),               // 0xbd
+    ("CP (HL)", GameBoy::cp_a_hl),             // 0xbe
+    ("CP A", GameBoy::cp_a_a),               // 0xbf
     // ("RET NZ", retnz, 8),                // 0xc0
     // ("POP BC", pop, 12),           // 0xc1
     // ("JP NZ, NN", 2, jpnz, 12),             // 0xc2
@@ -834,7 +834,7 @@ impl GameBoy {
     fn inc_at_hl(&mut self) -> u8 {
         let addr = self.regs.get_hl();
         let old_carry = self.regs.f & CARRY;
-        let (r, mut f) = add(self.mmu.read_byte(addr), 1, self.regs.f);
+        let (r, mut f) = add(self.mmu.read_byte(addr), 1);
         if old_carry == CARRY {
             f |= CARRY;
         } else {
@@ -848,7 +848,7 @@ impl GameBoy {
     fn dec_at_hl(&mut self) -> u8 {
         let addr = self.regs.get_hl();
         let old_carry = self.regs.f & CARRY;
-        let (r, mut f) = sub(self.mmu.read_byte(addr), 1, self.regs.f);
+        let (r, mut f) = sub(self.mmu.read_byte(addr), 1);
         if old_carry == CARRY {
             f |= CARRY;
         } else {
@@ -864,32 +864,335 @@ impl GameBoy {
         12
     }
 
-    fn add_hl_bc(&mut self) -> u8 {
-        let (hl, f) = add_16(self.regs.get_hl(), self.regs.get_bc(), self.regs.f);
-        self.regs.set_hl(hl);
+    fn add_a_a(&mut self) -> u8 {
+        self.add_a(self.regs.a)
+    }
+
+    fn add_a_b(&mut self) -> u8 {
+        self.add_a(self.regs.b)
+    }
+
+    fn add_a_c(&mut self) -> u8 {
+        self.add_a(self.regs.c)
+    }
+
+    fn add_a_d(&mut self) -> u8 {
+        self.add_a(self.regs.d)
+    }
+
+    fn add_a_e(&mut self) -> u8 {
+        self.add_a(self.regs.e)
+    }
+
+    fn add_a_h(&mut self) -> u8 {
+        self.add_a(self.regs.h)
+    }
+
+    fn add_a_l(&mut self) -> u8 {
+        self.add_a(self.regs.l)
+    }
+
+    fn add_a_hl(&mut self) -> u8 {
+        4 + self.add_a(self.mmu.read_byte(self.regs.get_hl()))
+    }
+
+    fn add_a(&mut self, operand: u8) -> u8 {
+        let (a, f) = add(self.regs.a, operand);
+        self.regs.a = a;
         self.regs.f = f;
-        8
+        4
+    }
+
+    fn add_hl_bc(&mut self) -> u8 {
+        self.add_hl(self.regs.get_bc())
     }
 
     fn add_hl_de(&mut self) -> u8 {
-        let (hl, f) = add_16(self.regs.get_hl(), self.regs.get_de(), self.regs.f);
-        self.regs.set_hl(hl);
-        self.regs.f = f;
-        8
+        self.add_hl(self.regs.get_de())
     }
 
     fn add_hl_hl(&mut self) -> u8 {
-        let (hl, f) = add_16(self.regs.get_hl(), self.regs.get_de(), self.regs.f);
+        self.add_hl(self.regs.get_hl())
+    }
+
+    fn add_hl_sp(&mut self) -> u8 {
+        self.add_hl(self.regs.sp)
+    }
+
+    fn add_hl(&mut self, operand: u16) -> u8 {
+        let (hl, f) = add_16(self.regs.get_hl(), operand, self.regs.f);
         self.regs.set_hl(hl);
         self.regs.f = f;
         8
     }
 
-    fn add_hl_sp(&mut self) -> u8 {
-        let (hl, f) = add_16(self.regs.get_hl(), self.regs.sp, self.regs.f);
-        self.regs.set_hl(hl);
+    fn adc_a_a(&mut self) -> u8 {
+        self.adc_a(self.regs.a)
+    }
+
+    fn adc_a_b(&mut self) -> u8 {
+        self.adc_a(self.regs.b)
+    }
+
+    fn adc_a_c(&mut self) -> u8 {
+        self.adc_a(self.regs.c)
+    }
+
+    fn adc_a_d(&mut self) -> u8 {
+        self.adc_a(self.regs.d)
+    }
+
+    fn adc_a_e(&mut self) -> u8 {
+        self.adc_a(self.regs.e)
+    }
+
+    fn adc_a_h(&mut self) -> u8 {
+        self.adc_a(self.regs.h)
+    }
+
+    fn adc_a_l(&mut self) -> u8 {
+        self.adc_a(self.regs.l)
+    }
+
+    fn adc_a_hl(&mut self) -> u8 {
+        4 + self.adc_a(self.mmu.read_byte(self.regs.get_hl()))
+    }
+
+    fn adc_a(&mut self, operand: u8) -> u8 {
+        let (a, f) = addc(self.regs.a, operand, self.regs.f & CARRY == CARRY);
+        self.regs.a = a;
         self.regs.f = f;
-        8
+        4
+    }
+
+    fn sub_a_a(&mut self) -> u8 {
+        self.sub_a(self.regs.a)
+    }
+
+    fn sub_a_b(&mut self) -> u8 {
+        self.sub_a(self.regs.b)
+    }
+
+    fn sub_a_c(&mut self) -> u8 {
+        self.sub_a(self.regs.c)
+    }
+
+    fn sub_a_d(&mut self) -> u8 {
+        self.sub_a(self.regs.d)
+    }
+
+    fn sub_a_e(&mut self) -> u8 {
+        self.sub_a(self.regs.e)
+    }
+
+    fn sub_a_h(&mut self) -> u8 {
+        self.sub_a(self.regs.h)
+    }
+
+    fn sub_a_l(&mut self) -> u8 {
+        self.sub_a(self.regs.l)
+    }
+
+    fn sub_a_hl(&mut self) -> u8 {
+        4 + self.sub_a(self.mmu.read_byte(self.regs.get_hl()))
+    }
+
+    fn sub_a(&mut self, operand: u8) -> u8 {
+        let (a, f) = sub(self.regs.a, operand);
+        self.regs.a = a;
+        self.regs.f = f;
+        4
+    }
+
+    fn sbc_a_a(&mut self) -> u8 {
+        self.sbc_a(self.regs.a)
+    }
+
+    fn sbc_a_b(&mut self) -> u8 {
+        self.sbc_a(self.regs.b)
+    }
+
+    fn sbc_a_c(&mut self) -> u8 {
+        self.sbc_a(self.regs.c)
+    }
+
+    fn sbc_a_d(&mut self) -> u8 {
+        self.sbc_a(self.regs.d)
+    }
+
+    fn sbc_a_e(&mut self) -> u8 {
+        self.sbc_a(self.regs.e)
+    }
+
+    fn sbc_a_h(&mut self) -> u8 {
+        self.sbc_a(self.regs.h)
+    }
+
+    fn sbc_a_l(&mut self) -> u8 {
+        self.sbc_a(self.regs.l)
+    }
+
+    fn sbc_a_hl(&mut self) -> u8 {
+        4 + self.sbc_a(self.mmu.read_byte(self.regs.get_hl()))
+    }
+
+    fn sbc_a(&mut self, operand: u8) -> u8 {
+        let (a, f) = subc(self.regs.a, operand, self.regs.f & CARRY == CARRY);
+        self.regs.a = a;
+        self.regs.f = f;
+        4
+    }
+
+    fn and_a_a(&mut self) -> u8 {
+        self.and_a(self.regs.a)
+    }
+
+    fn and_a_b(&mut self) -> u8 {
+        self.and_a(self.regs.b)
+    }
+
+    fn and_a_c(&mut self) -> u8 {
+        self.and_a(self.regs.c)
+    }
+
+    fn and_a_d(&mut self) -> u8 {
+        self.and_a(self.regs.d)
+    }
+
+    fn and_a_e(&mut self) -> u8 {
+        self.and_a(self.regs.e)
+    }
+
+    fn and_a_h(&mut self) -> u8 {
+        self.and_a(self.regs.h)
+    }
+
+    fn and_a_l(&mut self) -> u8 {
+        self.and_a(self.regs.l)
+    }
+
+    fn and_a_hl(&mut self) -> u8 {
+        4 + self.and_a(self.mmu.read_byte(self.regs.get_hl()))
+    }
+
+    fn and_a(&mut self, operand: u8) -> u8 {
+        self.regs.a &= operand;
+        self.regs.f = HALF_CARRY | if self.regs.a == 0 { ZERO } else { 0 };
+        4
+    }
+
+    fn xor_a_a(&mut self) -> u8 {
+        self.xor_a(self.regs.a)
+    }
+
+    fn xor_a_b(&mut self) -> u8 {
+        self.xor_a(self.regs.b)
+    }
+
+    fn xor_a_c(&mut self) -> u8 {
+        self.xor_a(self.regs.c)
+    }
+
+    fn xor_a_d(&mut self) -> u8 {
+        self.xor_a(self.regs.d)
+    }
+
+    fn xor_a_e(&mut self) -> u8 {
+        self.xor_a(self.regs.e)
+    }
+
+    fn xor_a_h(&mut self) -> u8 {
+        self.xor_a(self.regs.h)
+    }
+
+    fn xor_a_l(&mut self) -> u8 {
+        self.xor_a(self.regs.l)
+    }
+
+    fn xor_a_hl(&mut self) -> u8 {
+        4 + self.xor_a(self.mmu.read_byte(self.regs.get_hl()))
+    }
+
+    fn xor_a(&mut self, operand: u8) -> u8 {
+        self.regs.a ^= operand;
+        self.regs.f = if self.regs.a == 0 { ZERO } else { 0 };
+        4
+    }
+
+    fn or_a_a(&mut self) -> u8 {
+        self.or_a(self.regs.a)
+    }
+
+    fn or_a_b(&mut self) -> u8 {
+        self.or_a(self.regs.b)
+    }
+
+    fn or_a_c(&mut self) -> u8 {
+        self.or_a(self.regs.c)
+    }
+
+    fn or_a_d(&mut self) -> u8 {
+        self.or_a(self.regs.d)
+    }
+
+    fn or_a_e(&mut self) -> u8 {
+        self.or_a(self.regs.e)
+    }
+
+    fn or_a_h(&mut self) -> u8 {
+        self.or_a(self.regs.h)
+    }
+
+    fn or_a_l(&mut self) -> u8 {
+        self.or_a(self.regs.l)
+    }
+
+    fn or_a_hl(&mut self) -> u8 {
+        4 + self.or_a(self.mmu.read_byte(self.regs.get_hl()))
+    }
+
+    fn or_a(&mut self, operand: u8) -> u8 {
+        self.regs.a |= operand;
+        self.regs.f = if self.regs.a == 0 { ZERO } else { 0 };
+        4
+    }
+
+    fn cp_a_a(&mut self) -> u8 {
+        self.cp_a(self.regs.a)
+    }
+
+    fn cp_a_b(&mut self) -> u8 {
+        self.cp_a(self.regs.b)
+    }
+
+    fn cp_a_c(&mut self) -> u8 {
+        self.cp_a(self.regs.c)
+    }
+
+    fn cp_a_d(&mut self) -> u8 {
+        self.cp_a(self.regs.d)
+    }
+
+    fn cp_a_e(&mut self) -> u8 {
+        self.cp_a(self.regs.e)
+    }
+
+    fn cp_a_h(&mut self) -> u8 {
+        self.cp_a(self.regs.h)
+    }
+
+    fn cp_a_l(&mut self) -> u8 {
+        self.cp_a(self.regs.l)
+    }
+
+    fn cp_a_hl(&mut self) -> u8 {
+        4 + self.cp_a(self.mmu.read_byte(self.regs.get_hl()))
+    }
+
+    fn cp_a(&mut self, operand: u8) -> u8 {
+        let (_, f) = sub(self.regs.a, operand);
+        self.regs.f = f;
+        4
     }
 
     fn jr_n(&mut self) -> u8 {
@@ -1003,7 +1306,7 @@ impl GameBoy {
 }
 
 fn inc_r(reg: u8, f: u8) -> (u8, u8) {
-    let (r, mut new_f) = add(reg, 1, f);
+    let (r, mut new_f) = add(reg, 1);
     new_f = if f & CARRY == CARRY {
         new_f | CARRY
     } else {
@@ -1013,7 +1316,7 @@ fn inc_r(reg: u8, f: u8) -> (u8, u8) {
 }
 
 fn dec_r(reg: u8, f: u8) -> (u8, u8) {
-    let (r, mut new_f) = sub(reg, 1, f);
+    let (r, mut new_f) = sub(reg, 1);
     new_f = if f & CARRY == CARRY {
         new_f | CARRY
     } else {
@@ -1034,16 +1337,16 @@ fn add_16(op1: u16, op2: u16, f: u8) -> (u16, u8) {
     (r as u16, f)
 }
 
-fn add(op1: u8, op2: u8, f: u8) -> (u8, u8) {
-    add_impl(op1, op2, f, false)
+fn add(op1: u8, op2: u8) -> (u8, u8) {
+    add_impl(op1, op2, false, false)
 }
 
-fn addc(op1: u8, op2: u8, f: u8) -> (u8, u8) {
-    add_impl(op1, op2, f, true)
+fn addc(op1: u8, op2: u8, carry_on: bool) -> (u8, u8) {
+    add_impl(op1, op2, true, carry_on)
 }
 
-fn add_impl(op1: u8, op2: u8, f: u8, use_carry: bool) -> (u8, u8) {
-    let carry = if use_carry { ((f & CARRY) >> 4) } else { 0 };
+fn add_impl(op1: u8, op2: u8, use_carry: bool, carry_on: bool) -> (u8, u8) {
+    let carry = if use_carry && carry_on { 1 } else { 0 };
     let r16 = op1 as u16 + op2 as u16 + carry as u16;
     let r = r16 as u8;
     let f = 0
@@ -1057,16 +1360,16 @@ fn add_impl(op1: u8, op2: u8, f: u8, use_carry: bool) -> (u8, u8) {
     (r, f)
 }
 
-fn sub(op1: u8, op2: u8, f: u8) -> (u8, u8) {
-    sub_impl(op1, op2, f, false)
+fn sub(op1: u8, op2: u8) -> (u8, u8) {
+    sub_impl(op1, op2, false, false)
 }
 
-fn subc(op1: u8, op2: u8, f: u8) -> (u8, u8) {
-    sub_impl(op1, op2, f, true)
+fn subc(op1: u8, op2: u8, carry_on: bool) -> (u8, u8) {
+    sub_impl(op1, op2, true, carry_on)
 }
 
-fn sub_impl(op1: u8, op2: u8, f: u8, use_borrow: bool) -> (u8, u8) {
-    let borrow = if use_borrow { ((f & CARRY) >> 4) } else { 0 };
+fn sub_impl(op1: u8, op2: u8, use_borrow: bool, carry_on: bool) -> (u8, u8) {
+    let borrow = if use_borrow && carry_on { 1 } else { 0 };
     let r16 = op1 as u16 - op2 as u16 - borrow as u16;
     let r = r16 as u8;
     let f = SUB
