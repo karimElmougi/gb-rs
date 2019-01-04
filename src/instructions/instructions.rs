@@ -3,7 +3,7 @@ const HALF_CARRY: u8 = 0b0010_0000;
 const SUB: u8 = 0b0100_0000;
 const ZERO: u8 = 0b1000_0000;
 
-const INSTRUCTIONS: [(&'static str, fn(&mut GameBoy) -> u8); 40] = [
+const INSTRUCTIONS: [(&'static str, fn(&mut GameBoy) -> u8); 128] = [
     ("NOP", GameBoy::nop),              // 0x01
     ("LD BC, NN", GameBoy::ld_bc_nn),   // 0x02
     ("LD (BC), A", GameBoy::ld_bc_a),   // 0x02
@@ -44,94 +44,94 @@ const INSTRUCTIONS: [(&'static str, fn(&mut GameBoy) -> u8); 40] = [
     ("DEC H", GameBoy::dec_h),          // 0x25
     ("LD H, N", GameBoy::ld_h_n),       // 0x26
     ("DAA", GameBoy::daa),              // 0x27
-    // ("JR Z, N", jrz, 8),                 // 0x28
-    // ("ADD HL, HL", add_hl_rr, 8),  // 0x29
-    // ("LDI A, (HL)", ldi_a_hl, 8),        // 0x2a
-    // ("DEC HL", dec_rr, 8),         // 0x2b
-    // ("INC L", inc_r, 4),               // 0x2c
-    // ("DEC L", dec_r, 4),               // 0x2d
-    // ("LD L, N", ld_r_n, 8),            // 0x2e
-    // ("CPL", cpl, 4),                     // 0x2f
-    // ("JR NC, N", jrnc, 8),               // 0x30
-    // ("LD SP, NN", 2, ld_sp_nn, 12),         // 0x31
-    // ("LDD (HL), A", ldd_hl_a, 8),        // 0x32
-    // ("INC SP", inc_sp, 8),               // 0x33
-    // ("INC (HL)", inc_at_hl, 12),         // 0x34
-    // ("DEC (HL)", dec_at_hl, 12),         // 0x35
-    // ("LD (HL), N", ld_hl_nn, 12),        // 0x36
-    // ("SCF", scf, 4),                     // 0x37
-    // ("JR C, N", jrc, 8),                 // 0x38
-    // ("ADD HL, SP", add_hl_sp, 8),        // 0x39
-    // ("LDD A, (HL)", ldd_a_hl, 8),        // 0x3a
-    // ("DEC SP", dec_sp, 8),               // 0x3b
-    // ("INC A", inc_r, 4),               // 0x3c
-    // ("DEC A", dec_r, 4),               // 0x3d
-    // ("LD A, N", ld_r_n, 8),            // 0x3e
-    // ("CCF", ccf, 4),                     // 0x3f
-    // ("LD B, B", ld_r_r, 4),        // 0x40
-    // ("LD B, C", ld_r_r, 4),        // 0x41
-    // ("LD B, D", ld_r_r, 4),        // 0x42
-    // ("LD B, E", ld_r_r, 4),        // 0x43
-    // ("LD B, H", ld_r_r, 4),        // 0x44
-    // ("LD B, L", ld_r_r, 4),        // 0x45
-    // ("LD B, (HL)", ld_r_hl, 8),        // 0x46
-    // ("LD B, A", ld_r_r, 4),        // 0x47
-    // ("LD C, B", ld_r_r, 4),        // 0x48
-    // ("LD C, C", ld_r_r, 4),        // 0x49
-    // ("LD C, D", ld_r_r, 4),        // 0x4a
-    // ("LD C, E", ld_r_r, 4),        // 0x4b
-    // ("LD C, H", ld_r_r, 4),        // 0x4c
-    // ("LD C, L", ld_r_r, 4),        // 0x4d
-    // ("LD C, (HL)", ld_r_hl, 8),        // 0x4e
-    // ("LD C, A", ld_r_r, 4),        // 0x4f
-    // ("LD D, B", ld_r_r, 4),        // 0x50
-    // ("LD D, C", ld_r_r, 4),        // 0x51
-    // ("LD D, D", ld_r_r, 4),        // 0x52
-    // ("LD D, E", ld_r_r, 4),        // 0x53
-    // ("LD D, H", ld_r_r, 4),        // 0x54
-    // ("LD D, L", ld_r_r, 4),        // 0x55
-    // ("LD D, (HL)", ld_r_hl, 8),        // 0x56
-    // ("LD D, A", ld_r_r, 4),        // 0x57
-    // ("LD E, B", ld_r_r, 4),        // 0x58
-    // ("LD E, C", ld_r_r, 4),        // 0x59
-    // ("LD E, D", ld_r_r, 4),        // 0x5a
-    // ("LD E, E", ld_r_r, 4),        // 0x5b
-    // ("LD E, H", ld_r_r, 4),        // 0x5c
-    // ("LD E, L", ld_r_r, 4),        // 0x5d
-    // ("LD E, (HL)", ld_r_hl, 8),        // 0x5e
-    // ("LD E, A", ld_r_r, 4),        // 0x5f
-    // ("LD H, B", ld_r_r, 4),        // 0x60
-    // ("LD H, C", ld_r_r, 4),        // 0x61
-    // ("LD H, D", ld_r_r, 4),        // 0x62
-    // ("LD H, E", ld_r_r, 4),        // 0x63
-    // ("LD H, H", ld_r_r, 4),        // 0x64
-    // ("LD H, L", ld_r_r, 4),        // 0x65
-    // ("LD H, (HL)", ld_r_hl, 8),        // 0x66
-    // ("LD H, A", ld_r_r, 4),        // 0x67
-    // ("LD L, B", ld_r_r, 4),        // 0x68
-    // ("LD L, C", ld_r_r, 4),        // 0x69
-    // ("LD L, D", ld_r_r, 4),        // 0x6a
-    // ("LD L, E", ld_r_r, 4),        // 0x6b
-    // ("LD L, H", ld_r_r, 4),        // 0x6c
-    // ("LD L, L", ld_r_r, 4),        // 0x6d
-    // ("LD L, (HL)", ld_r_hl, 8),        // 0x6e
-    // ("LD L, A", ld_r_r, 4),        // 0x6f
-    // ("LD (HL), B", ld_hl_r, 8),        // 0x70
-    // ("LD (HL), C", ld_hl_r, 8),        // 0x71
-    // ("LD (HL), D", ld_hl_r, 8),        // 0x72
-    // ("LD (HL), E", ld_hl_r, 8),        // 0x73
-    // ("LD (HL), H", ld_hl_r, 8),        // 0x74
-    // ("LD (HL), L", ld_hl_r, 8),        // 0x75
-    // ("HALT", halt),                   // 0x76
-    // ("LD (HL), A", ld_hl_r, 8),        // 0x77
-    // ("LD A, B", ld_r_r, 4),        // 0x78
-    // ("LD A, C", ld_r_r, 4),        // 0x79
-    // ("LD A, D", ld_r_r, 4),        // 0x7a
-    // ("LD A, E", ld_r_r, 4),        // 0x7b
-    // ("LD A, H", ld_r_r, 4),        // 0x7c
-    // ("LD A, L", ld_r_r, 4),        // 0x7d
-    // ("LD A, (HL)", ld_r_hl, 8),        // 0x7e
-    // ("LD A, A", ld_r_r, 4),        // 0x7f
+    ("JR Z, N", GameBoy::jr_z),         // 0x28
+    ("ADD HL, HL", GameBoy::add_hl_hl), // 0x29
+    ("LDI A, (HL)", GameBoy::ldi_a_hl), // 0x2a
+    ("DEC HL", GameBoy::dec_hl),        // 0x2b
+    ("INC L", GameBoy::inc_l),          // 0x2c
+    ("DEC L", GameBoy::dec_l),          // 0x2d
+    ("LD L, N", GameBoy::ld_l_n),       // 0x2e
+    ("CPL", GameBoy::cpl),              // 0x2f
+    ("JR NC, N", GameBoy::jr_nc),       // 0x30
+    ("LD SP, NN", GameBoy::ld_sp_nn),   // 0x31
+    ("LDD (HL), A", GameBoy::ldd_hl_a), // 0x32
+    ("INC SP", GameBoy::inc_sp),        // 0x33
+    ("INC (HL)", GameBoy::inc_at_hl),   // 0x34
+    ("DEC (HL)", GameBoy::dec_at_hl),   // 0x35
+    ("LD (HL), N", GameBoy::ld_hl_nn),  // 0x36
+    ("SCF", GameBoy::scf),              // 0x37
+    ("JR C, N", GameBoy::jr_c),         // 0x38
+    ("ADD HL, SP", GameBoy::add_hl_sp), // 0x39
+    ("LDD A, (HL)", GameBoy::ldd_a_hl), // 0x3a
+    ("DEC SP", GameBoy::dec_sp),        // 0x3b
+    ("INC A", GameBoy::inc_a),          // 0x3c
+    ("DEC A", GameBoy::dec_a),          // 0x3d
+    ("LD A, N", GameBoy::ld_a_n),       // 0x3e
+    ("CCF", GameBoy::ccf),              // 0x3f
+    ("LD B, B", GameBoy::ld_b_b),       // 0x40
+    ("LD B, C", GameBoy::ld_b_c),       // 0x41
+    ("LD B, D", GameBoy::ld_b_d),       // 0x42
+    ("LD B, E", GameBoy::ld_b_e),       // 0x43
+    ("LD B, H", GameBoy::ld_b_h),       // 0x44
+    ("LD B, L", GameBoy::ld_b_l),       // 0x45
+    ("LD B, (HL)", GameBoy::ld_b_hl),   // 0x46
+    ("LD B, A", GameBoy::ld_b_a),       // 0x47
+    ("LD C, B", GameBoy::ld_c_b),       // 0x48
+    ("LD C, C", GameBoy::ld_c_c),       // 0x49
+    ("LD C, D", GameBoy::ld_c_d),       // 0x4a
+    ("LD C, E", GameBoy::ld_c_e),       // 0x4b
+    ("LD C, H", GameBoy::ld_c_h),       // 0x4c
+    ("LD C, L", GameBoy::ld_c_l),       // 0x4d
+    ("LD C, (HL)", GameBoy::ld_c_hl),   // 0x4e
+    ("LD C, A", GameBoy::ld_c_a),       // 0x4f
+    ("LD D, B", GameBoy::ld_d_b),       // 0x50
+    ("LD D, C", GameBoy::ld_d_c),       // 0x51
+    ("LD D, D", GameBoy::ld_d_d),       // 0x52
+    ("LD D, E", GameBoy::ld_d_e),       // 0x53
+    ("LD D, H", GameBoy::ld_d_h),       // 0x54
+    ("LD D, L", GameBoy::ld_d_l),       // 0x55
+    ("LD D, (HL)", GameBoy::ld_d_hl),   // 0x56
+    ("LD D, A", GameBoy::ld_d_a),       // 0x57
+    ("LD E, B", GameBoy::ld_e_b),       // 0x58
+    ("LD E, C", GameBoy::ld_e_c),       // 0x59
+    ("LD E, D", GameBoy::ld_e_d),       // 0x5a
+    ("LD E, E", GameBoy::ld_e_e),       // 0x5b
+    ("LD E, H", GameBoy::ld_e_h),       // 0x5c
+    ("LD E, L", GameBoy::ld_e_l),       // 0x5d
+    ("LD E, (HL)", GameBoy::ld_e_hl),   // 0x5e
+    ("LD E, A", GameBoy::ld_e_a),       // 0x5f
+    ("LD H, B", GameBoy::ld_h_b),       // 0x60
+    ("LD H, C", GameBoy::ld_h_c),       // 0x61
+    ("LD H, D", GameBoy::ld_h_d),       // 0x62
+    ("LD H, E", GameBoy::ld_h_e),       // 0x63
+    ("LD H, H", GameBoy::ld_h_h),       // 0x64
+    ("LD H, L", GameBoy::ld_h_l),       // 0x65
+    ("LD H, (HL)", GameBoy::ld_h_hl),   // 0x66
+    ("LD H, A", GameBoy::ld_h_a),       // 0x67
+    ("LD L, B", GameBoy::ld_l_b),       // 0x68
+    ("LD L, C", GameBoy::ld_l_c),       // 0x69
+    ("LD L, D", GameBoy::ld_l_d),       // 0x6a
+    ("LD L, E", GameBoy::ld_l_e),       // 0x6b
+    ("LD L, H", GameBoy::ld_l_h),       // 0x6c
+    ("LD L, L", GameBoy::ld_l_l),       // 0x6d
+    ("LD L, (HL)", GameBoy::ld_l_hl),   // 0x6e
+    ("LD L, A", GameBoy::ld_l_a),       // 0x6f
+    ("LD (HL), B", GameBoy::ld_hl_b),   // 0x70
+    ("LD (HL), C", GameBoy::ld_hl_c),   // 0x71
+    ("LD (HL), D", GameBoy::ld_hl_d),   // 0x72
+    ("LD (HL), E", GameBoy::ld_hl_e),   // 0x73
+    ("LD (HL), H", GameBoy::ld_hl_h),   // 0x74
+    ("LD (HL), L", GameBoy::ld_hl_l),   // 0x75
+    ("HALT", GameBoy::halt),            // 0x76
+    ("LD (HL), A", GameBoy::ld_hl_a),   // 0x77
+    ("LD A, B", GameBoy::ld_a_b),       // 0x78
+    ("LD A, C", GameBoy::ld_a_c),       // 0x79
+    ("LD A, D", GameBoy::ld_a_d),       // 0x7a
+    ("LD A, E", GameBoy::ld_a_e),       // 0x7b
+    ("LD A, H", GameBoy::ld_a_h),       // 0x7c
+    ("LD A, L", GameBoy::ld_a_l),       // 0x7d
+    ("LD A, (HL)", GameBoy::ld_a_hl),   // 0x7e
+    ("LD A, A", GameBoy::ld_a_a),       // 0x7f
     // ("ADD A, B", add_a_r, 4),          // 0x80
     // ("ADD A, C", add_a_r, 4),          // 0x81
     // ("ADD A, D", add_a_r, 4),          // 0x82
@@ -318,6 +318,244 @@ impl GameBoy {
         12
     }
 
+    fn ld_a_a(&mut self) -> u8 {
+        4
+    }
+
+    fn ld_a_b(&mut self) -> u8 {
+        self.regs.a = self.regs.b;
+        4
+    }
+
+    fn ld_a_c(&mut self) -> u8 {
+        self.regs.a = self.regs.c;
+        4
+    }
+
+    fn ld_a_d(&mut self) -> u8 {
+        self.regs.a = self.regs.d;
+        4
+    }
+
+    fn ld_a_e(&mut self) -> u8 {
+        self.regs.a = self.regs.e;
+        4
+    }
+
+    fn ld_a_h(&mut self) -> u8 {
+        self.regs.a = self.regs.h;
+        4
+    }
+
+    fn ld_a_l(&mut self) -> u8 {
+        self.regs.a = self.regs.l;
+        4
+    }
+
+    fn ld_b_a(&mut self) -> u8 {
+        self.regs.b = self.regs.a;
+        4
+    }
+
+    fn ld_b_b(&mut self) -> u8 {
+        4
+    }
+
+    fn ld_b_c(&mut self) -> u8 {
+        self.regs.b = self.regs.c;
+        4
+    }
+
+    fn ld_b_d(&mut self) -> u8 {
+        self.regs.b = self.regs.d;
+        4
+    }
+
+    fn ld_b_e(&mut self) -> u8 {
+        self.regs.b = self.regs.e;
+        4
+    }
+
+    fn ld_b_h(&mut self) -> u8 {
+        self.regs.b = self.regs.h;
+        4
+    }
+
+    fn ld_b_l(&mut self) -> u8 {
+        self.regs.b = self.regs.l;
+        4
+    }
+
+    fn ld_c_a(&mut self) -> u8 {
+        self.regs.c = self.regs.a;
+        4
+    }
+
+    fn ld_c_b(&mut self) -> u8 {
+        self.regs.c = self.regs.b;
+        4
+    }
+
+    fn ld_c_c(&mut self) -> u8 {
+        4
+    }
+
+    fn ld_c_d(&mut self) -> u8 {
+        self.regs.c = self.regs.d;
+        4
+    }
+
+    fn ld_c_e(&mut self) -> u8 {
+        self.regs.c = self.regs.e;
+        4
+    }
+
+    fn ld_c_h(&mut self) -> u8 {
+        self.regs.c = self.regs.h;
+        4
+    }
+
+    fn ld_c_l(&mut self) -> u8 {
+        self.regs.c = self.regs.l;
+        4
+    }
+
+    fn ld_d_a(&mut self) -> u8 {
+        self.regs.d = self.regs.a;
+        4
+    }
+
+    fn ld_d_b(&mut self) -> u8 {
+        self.regs.d = self.regs.b;
+        4
+    }
+
+    fn ld_d_c(&mut self) -> u8 {
+        self.regs.d = self.regs.c;
+        4
+    }
+
+    fn ld_d_d(&mut self) -> u8 {
+        4
+    }
+
+    fn ld_d_e(&mut self) -> u8 {
+        self.regs.d = self.regs.e;
+        4
+    }
+
+    fn ld_d_h(&mut self) -> u8 {
+        self.regs.d = self.regs.h;
+        4
+    }
+
+    fn ld_d_l(&mut self) -> u8 {
+        self.regs.d = self.regs.l;
+        4
+    }
+
+    fn ld_e_a(&mut self) -> u8 {
+        self.regs.e = self.regs.a;
+        4
+    }
+
+    fn ld_e_b(&mut self) -> u8 {
+        self.regs.e = self.regs.b;
+        4
+    }
+
+    fn ld_e_c(&mut self) -> u8 {
+        self.regs.e = self.regs.c;
+        4
+    }
+
+    fn ld_e_d(&mut self) -> u8 {
+        self.regs.e = self.regs.d;
+        4
+    }
+
+    fn ld_e_e(&mut self) -> u8 {
+        4
+    }
+
+    fn ld_e_h(&mut self) -> u8 {
+        self.regs.e = self.regs.h;
+        4
+    }
+
+    fn ld_e_l(&mut self) -> u8 {
+        self.regs.e = self.regs.l;
+        4
+    }
+
+    fn ld_h_a(&mut self) -> u8 {
+        self.regs.h = self.regs.a;
+        4
+    }
+
+    fn ld_h_b(&mut self) -> u8 {
+        self.regs.h = self.regs.b;
+        4
+    }
+
+    fn ld_h_c(&mut self) -> u8 {
+        self.regs.h = self.regs.c;
+        4
+    }
+
+    fn ld_h_d(&mut self) -> u8 {
+        self.regs.h = self.regs.d;
+        4
+    }
+
+    fn ld_h_e(&mut self) -> u8 {
+        self.regs.h = self.regs.e;
+        4
+    }
+
+    fn ld_h_h(&mut self) -> u8 {
+        4
+    }
+
+    fn ld_h_l(&mut self) -> u8 {
+        self.regs.h = self.regs.l;
+        4
+    }
+
+    fn ld_l_a(&mut self) -> u8 {
+        self.regs.l = self.regs.a;
+        4
+    }
+
+    fn ld_l_b(&mut self) -> u8 {
+        self.regs.l = self.regs.b;
+        4
+    }
+
+    fn ld_l_c(&mut self) -> u8 {
+        self.regs.l = self.regs.c;
+        4
+    }
+
+    fn ld_l_d(&mut self) -> u8 {
+        self.regs.l = self.regs.d;
+        4
+    }
+
+    fn ld_l_e(&mut self) -> u8 {
+        self.regs.l = self.regs.e;
+        4
+    }
+
+    fn ld_l_h(&mut self) -> u8 {
+        self.regs.l = self.regs.h;
+        4
+    }
+
+    fn ld_l_l(&mut self) -> u8 {
+        4
+    }
+
     fn ld_a_bc(&mut self) -> u8 {
         self.regs.a = self.mmu.read_byte(self.regs.get_bc());
         8
@@ -325,6 +563,41 @@ impl GameBoy {
 
     fn ld_a_de(&mut self) -> u8 {
         self.regs.a = self.mmu.read_byte(self.regs.get_de());
+        8
+    }
+
+    fn ld_a_hl(&mut self) -> u8 {
+        self.regs.a = self.mmu.read_byte(self.regs.get_hl());
+        8
+    }
+
+    fn ld_b_hl(&mut self) -> u8 {
+        self.regs.b = self.mmu.read_byte(self.regs.get_hl());
+        8
+    }
+
+    fn ld_c_hl(&mut self) -> u8 {
+        self.regs.c = self.mmu.read_byte(self.regs.get_hl());
+        8
+    }
+
+    fn ld_d_hl(&mut self) -> u8 {
+        self.regs.d = self.mmu.read_byte(self.regs.get_hl());
+        8
+    }
+
+    fn ld_e_hl(&mut self) -> u8 {
+        self.regs.e = self.mmu.read_byte(self.regs.get_hl());
+        8
+    }
+
+    fn ld_h_hl(&mut self) -> u8 {
+        self.regs.h = self.mmu.read_byte(self.regs.get_hl());
+        8
+    }
+
+    fn ld_l_hl(&mut self) -> u8 {
+        self.regs.l = self.mmu.read_byte(self.regs.get_hl());
         8
     }
 
@@ -337,6 +610,11 @@ impl GameBoy {
     fn ld_hl_nn(&mut self) -> u8 {
         let n = self.fetch_word();
         self.regs.set_hl(n);
+        12
+    }
+
+    fn ld_sp_nn(&mut self) -> u8 {
+        self.regs.sp = self.fetch_word();
         12
     }
 
@@ -391,9 +669,27 @@ impl GameBoy {
         20
     }
 
+    fn ldi_a_hl(&mut self) -> u8 {
+        self.ld_a_hl();
+        self.inc_hl();
+        8
+    }
+
     fn ldi_hl_a(&mut self) -> u8 {
         self.ld_hl_a();
         self.inc_hl();
+        8
+    }
+
+    fn ldd_a_hl(&mut self) -> u8 {
+        self.ld_a_hl();
+        self.dec_hl();
+        8
+    }
+
+    fn ldd_hl_a(&mut self) -> u8 {
+        self.ld_hl_a();
+        self.dec_hl();
         8
     }
 
@@ -510,6 +806,11 @@ impl GameBoy {
         8
     }
 
+    fn inc_sp(&mut self) -> u8 {
+        self.regs.sp += 1;
+        8
+    }
+
     fn dec_bc(&mut self) -> u8 {
         self.regs.set_bc(self.regs.get_bc() - 1);
         8
@@ -525,33 +826,42 @@ impl GameBoy {
         8
     }
 
-    fn rlca(&mut self) -> u8 {
-        let bit_7 = self.regs.a >> 7;
-        self.regs.a = (self.regs.a << 1) | bit_7;
-        self.regs.f = if bit_7 == 1 { CARRY } else { 0 };
-        4
+    fn dec_sp(&mut self) -> u8 {
+        self.regs.sp -= 1;
+        8
     }
 
-    fn rla(&mut self) -> u8 {
-        let bit_7 = self.regs.a >> 7;
-        self.regs.a <<= 1;
-        self.regs.a |= if self.regs.f & CARRY == CARRY { 1 } else { 0 };
-        self.regs.f = if bit_7 == 1 { CARRY } else { 0 };
-        4
+    fn inc_at_hl(&mut self) -> u8 {
+        let addr = self.regs.get_hl();
+        let old_carry = self.regs.f & CARRY;
+        let (r, mut f) = add(self.mmu.read_byte(addr), 1, self.regs.f);
+        if old_carry == CARRY {
+            f |= CARRY;
+        } else {
+            f &= !CARRY;
+        }
+        self.regs.f = f;
+        self.mmu.write_byte(addr, r);
+        12
     }
 
-    fn rrca(&mut self) -> u8 {
-        let bit_0 = self.regs.a & 1;
-        self.regs.a = (self.regs.a >> 1) | (bit_0 << 7);
-        self.regs.f = if bit_0 == 1 { CARRY } else { 0 };
-        4
-    }
-
-    fn rra(&mut self) -> u8 {
-        let old_carry = (self.regs.f & CARRY) << 3;
-        self.regs.f = if self.regs.a & 1 == 1 { CARRY } else { 0 };
-        self.regs.a = (self.regs.a >> 1) | old_carry;
-        4
+    fn dec_at_hl(&mut self) -> u8 {
+        let addr = self.regs.get_hl();
+        let old_carry = self.regs.f & CARRY;
+        let (r, mut f) = sub(self.mmu.read_byte(addr), 1, self.regs.f);
+        if old_carry == CARRY {
+            f |= CARRY;
+        } else {
+            f &= !CARRY;
+        }
+        if r & 0xf == 0xf {
+            f |= HALF_CARRY;
+        } else {
+            f &= !HALF_CARRY;
+        }
+        self.regs.f = f;
+        self.mmu.write_byte(addr, r);
+        12
     }
 
     fn add_hl_bc(&mut self) -> u8 {
@@ -608,6 +918,55 @@ impl GameBoy {
             return 12;
         }
         8
+    }
+
+    fn rlca(&mut self) -> u8 {
+        let bit_7 = self.regs.a >> 7;
+        self.regs.a = (self.regs.a << 1) | bit_7;
+        self.regs.f = if bit_7 == 1 { CARRY } else { 0 };
+        4
+    }
+
+    fn rla(&mut self) -> u8 {
+        let bit_7 = self.regs.a >> 7;
+        self.regs.a <<= 1;
+        self.regs.a |= if self.regs.f & CARRY == CARRY { 1 } else { 0 };
+        self.regs.f = if bit_7 == 1 { CARRY } else { 0 };
+        4
+    }
+
+    fn rrca(&mut self) -> u8 {
+        let bit_0 = self.regs.a & 1;
+        self.regs.a = (self.regs.a >> 1) | (bit_0 << 7);
+        self.regs.f = if bit_0 == 1 { CARRY } else { 0 };
+        4
+    }
+
+    fn rra(&mut self) -> u8 {
+        let old_carry = (self.regs.f & CARRY) << 3;
+        self.regs.f = if self.regs.a & 1 == 1 { CARRY } else { 0 };
+        self.regs.a = (self.regs.a >> 1) | old_carry;
+        4
+    }
+
+    fn cpl(&mut self) -> u8 {
+        self.regs.a = !self.regs.a;
+        self.regs.f |= SUB | HALF_CARRY;
+        4
+    }
+
+    fn scf(&mut self) -> u8 {
+        self.regs.f |= CARRY;
+        self.regs.f &= !HALF_CARRY;
+        self.regs.f &= !SUB;
+        4
+    }
+
+    fn ccf(&mut self) -> u8 {
+        self.regs.f ^= CARRY;
+        self.regs.f &= !HALF_CARRY;
+        self.regs.f &= !SUB;
+        4
     }
 
     fn daa(&mut self) -> u8 {
