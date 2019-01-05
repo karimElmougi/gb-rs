@@ -1,6 +1,6 @@
 use crate::cartridge::Cartridge;
-use crate::gameboy::InterruptFlag;
-use crate::gameboy::INTERRUPT_FLAG_ADDR;
+use crate::interrupts::InterruptFlag;
+use crate::interrupts::INTERRUPT_FLAG_ADDR;
 
 const DIVIDER_ADDR: u16 = 0xff04;
 const COUNTER_ADDR: u16 = 0xff05;

@@ -1,6 +1,8 @@
 mod cartridge;
+mod cpu;
 mod gameboy;
 mod gpu;
+mod interrupts;
 mod mmu;
 mod registers;
 

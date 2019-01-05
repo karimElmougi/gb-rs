@@ -1,6 +1,4 @@
-impl GameBoy {
-    fn execute_cb(&mut self) -> u8 {
-        let _op_code = self.fetch_byte();
-        0
-    }
+fn execute_cb(cpu: &mut CPU, mmu: &mut MMU) -> u8 {
+    let _op_code = cpu.fetch_byte(mmu);
+    0
 }
