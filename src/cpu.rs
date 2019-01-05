@@ -36,7 +36,8 @@ impl CPU {
     }
 
     pub fn execute(&mut self, mmu: &mut MMU, op_code: u8) -> u8 {
-        (INSTRUCTIONS[op_code as usize].1)(self, mmu)
+        let (_, f) = INSTRUCTIONS[op_code as usize];
+        f(self, mmu)
     }
 
     pub fn fetch_byte(&mut self, mmu: &MMU) -> u8 {
