@@ -1,14 +1,14 @@
 use crate::cartridge::Cartridge;
 
-pub struct MBC0 {
+pub struct MBC1 {
     rom: Vec<u8>,
 }
 
-pub fn new(rom: Vec<u8>) -> MBC0 {
-    MBC0 { rom }
+pub fn new(rom: Vec<u8>) -> MBC1 {
+    MBC1 { rom }
 }
 
-impl Cartridge for MBC0 {
+impl Cartridge for MBC1 {
     fn read_rom(&self, addr: u16) -> u8 {
         self.rom[addr as usize]
     }

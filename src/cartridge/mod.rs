@@ -1,4 +1,5 @@
 mod mbc0;
+mod mbc1;
 
 use std::fs::File;
 use std::io::Read;
@@ -10,14 +11,18 @@ pub trait Cartridge {
     fn write_ram(&mut self, addr: u16, value: u8);
 }
 
-pub fn new(rom_name: &str) -> impl Cartridge {
+pub fn new(rom_name: &str) -> Box<Cartridge> {
     let mut rom = vec![];
     let _ = File::open(rom_name)
         .expect("Could not read ROM file")
         .read_to_end(&mut rom);
 
+    println!("Size of the ROM: {}", rom.len());
+
     match rom[0x147] {
-        0x00 => mbc0::MBC0::new(rom),
-        _ => mbc0::MBC0::new(vec![0; 10]),
+        0x00 => Box::new(mbc0::new(rom)),
+        0x01...0x03 => Box::new(mbc1::new(rom)),
+        0x08...0x0d => Box::new(mbc0::new(rom)),
+        _ => Box::new(mbc0::new(vec![0; 10])),
     }
 }

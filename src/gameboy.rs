@@ -13,7 +13,7 @@ pub struct GameBoy {
 }
 
 pub fn new(file_name: &str) -> GameBoy {
-    let mmu = mmu::new(Box::new(cartridge::new(file_name)));
+    let mmu = mmu::new(cartridge::new(file_name));
     let cpu = cpu::new();
     let gpu = gpu::new();
     GameBoy { cpu, mmu, gpu }
@@ -21,7 +21,7 @@ pub fn new(file_name: &str) -> GameBoy {
 
 impl GameBoy {
     pub fn step(&mut self) {
-        let mut cycles_ellapsed = 0u8;
+        let mut cycles_ellapsed = self.cpu.step(&mut self.mmu);
         for _ in (0..CYCLES_PER_SECOND).step_by(cycles_ellapsed as usize) {
             cycles_ellapsed = self.cpu.step(&mut self.mmu);
             self.mmu.increment_counters(cycles_ellapsed as i32);
