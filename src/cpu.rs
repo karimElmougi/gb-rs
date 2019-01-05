@@ -1,5 +1,4 @@
-include!("instructions/instructions.rs");
-
+use crate::instructions::INSTRUCTIONS;
 use crate::mmu::MMU;
 use crate::registers;
 
