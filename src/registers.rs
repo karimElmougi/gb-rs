@@ -27,6 +27,15 @@ pub fn new() -> Registers {
 }
 
 impl Registers {
+    pub fn set_af(&mut self, value: u16) {
+        self.a = (value >> 8) as u8;
+        self.f = (value & 0xff) as u8;
+    }
+
+    pub fn get_af(&mut self) -> u16 {
+        ((self.a as u16) << 8) | (self.f as u16)
+    }
+
     pub fn set_bc(&mut self, value: u16) {
         self.b = (value >> 8) as u8;
         self.c = (value & 0xff) as u8;
