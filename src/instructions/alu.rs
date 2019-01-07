@@ -70,35 +70,35 @@ pub fn dec_b(cpu: &mut CPU, _: &mut MMU) -> u8 {
 
 pub fn dec_c(cpu: &mut CPU, _: &mut MMU) -> u8 {
     let (c, f) = dec_r(cpu.regs.c, cpu.regs.f);
-    cpu.regs.a = c;
+    cpu.regs.c = c;
     cpu.regs.f = f;
     4
 }
 
 pub fn dec_d(cpu: &mut CPU, _: &mut MMU) -> u8 {
     let (d, f) = dec_r(cpu.regs.d, cpu.regs.f);
-    cpu.regs.a = d;
+    cpu.regs.d = d;
     cpu.regs.f = f;
     4
 }
 
 pub fn dec_e(cpu: &mut CPU, _: &mut MMU) -> u8 {
     let (e, f) = dec_r(cpu.regs.e, cpu.regs.f);
-    cpu.regs.a = e;
+    cpu.regs.e = e;
     cpu.regs.f = f;
     4
 }
 
 pub fn dec_h(cpu: &mut CPU, _: &mut MMU) -> u8 {
     let (h, f) = dec_r(cpu.regs.h, cpu.regs.f);
-    cpu.regs.a = h;
+    cpu.regs.h = h;
     cpu.regs.f = f;
     4
 }
 
 pub fn dec_l(cpu: &mut CPU, _: &mut MMU) -> u8 {
     let (l, f) = dec_r(cpu.regs.l, cpu.regs.f);
-    cpu.regs.a = l;
+    cpu.regs.l = l;
     cpu.regs.f = f;
     4
 }

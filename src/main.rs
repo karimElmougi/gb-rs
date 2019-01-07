@@ -28,20 +28,16 @@ fn main() {
 
     let scale = 2;
 
-    let (width, height) = (scale*gpu::SCREEN_WIDTH, scale*gpu::SCREEN_HEIGHT);
-    let mut window: PistonWindow =
-        WindowSettings::new("gb_rs", (width, height))
+    let (width, height) = (scale * gpu::SCREEN_WIDTH, scale * gpu::SCREEN_HEIGHT);
+    let mut window: PistonWindow = WindowSettings::new("gb_rs", (width, height))
         .exit_on_esc(true)
         .opengl(OpenGL::V3_2)
         .build()
         .unwrap();
 
     let mut canvas = image::ImageBuffer::new(width, height);
-    let mut texture: G2dTexture = Texture::from_image(
-            &mut window.factory,
-            &canvas,
-            &TextureSettings::new()
-    ).unwrap();
+    let mut texture: G2dTexture =
+        Texture::from_image(&mut window.factory, &canvas, &TextureSettings::new()).unwrap();
 
     while let Some(e) = window.next() {
         if let Some(img) = gb.step() {

@@ -76,7 +76,7 @@ impl Cartridge for MBC1 {
                 } else {
                     self.ram_bank = value & 0x03;
                 }
-            },
+            }
             0x6000...0x7fff => {
                 if value & 0x01 == 0 {
                     self.rom_banking_enabled = true;
@@ -84,7 +84,7 @@ impl Cartridge for MBC1 {
                 } else {
                     self.rom_banking_enabled = false;
                 }
-            },
+            }
             _ => {}
         };
     }

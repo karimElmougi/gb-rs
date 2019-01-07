@@ -29,7 +29,7 @@ pub fn new() -> Registers {
 impl Registers {
     pub fn set_af(&mut self, value: u16) {
         self.a = (value >> 8) as u8;
-        self.f = (value & 0xff) as u8;
+        self.f = (value & 0xf0) as u8;
     }
 
     pub fn get_af(&mut self) -> u16 {

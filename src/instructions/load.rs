@@ -398,9 +398,33 @@ pub fn ld_hl_l(cpu: &mut CPU, mmu: &mut MMU) -> u8 {
     8
 }
 
-pub fn ld_n_a(cpu: &mut CPU, mmu: &mut MMU) -> u8 {
+pub fn ld_at_c_a(cpu: &mut CPU, mmu: &mut MMU) -> u8 {
+    let addr = 0xff00 + (cpu.regs.c as u16);
+    mmu.write_byte(addr, cpu.regs.a);
+    8
+}
+
+pub fn ld_a_from_c(cpu: &mut CPU, mmu: &mut MMU) -> u8 {
+    let addr = 0xff00 + (cpu.regs.c as u16);
+    cpu.regs.a = mmu.read_byte(addr);
+    8
+}
+
+pub fn ld_at_n_a(cpu: &mut CPU, mmu: &mut MMU) -> u8 {
     let addr = 0xff00 + (cpu.fetch_byte(mmu) as u16);
     mmu.write_byte(addr, cpu.regs.a);
+    12
+}
+
+pub fn ld_a_from_n(cpu: &mut CPU, mmu: &mut MMU) -> u8 {
+    let addr = 0xff00 + (cpu.fetch_byte(mmu) as u16);
+    cpu.regs.a = mmu.read_byte(addr);
+    12
+}
+
+pub fn ld_at_hl_n(cpu: &mut CPU, mmu: &mut MMU) -> u8 {
+    let n = cpu.fetch_byte(mmu);
+    mmu.write_byte(cpu.regs.get_hl(), n);
     12
 }
 
