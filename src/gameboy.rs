@@ -1,8 +1,11 @@
+extern crate image;
+
 use crate::cartridge;
 use crate::cpu;
 use crate::gpu;
 use crate::interrupts::isr;
 use crate::mmu;
+use image::RgbaImage;
 
 const CYCLES_PER_SECOND: i32 = 4194304 / 60;
 
@@ -20,13 +23,16 @@ pub fn new(file_name: &str) -> GameBoy {
 }
 
 impl GameBoy {
-    pub fn step(&mut self) {
-        let mut cycles_ellapsed = self.cpu.step(&mut self.mmu);
-        for _ in (0..CYCLES_PER_SECOND).step_by(cycles_ellapsed as usize) {
-            cycles_ellapsed = self.cpu.step(&mut self.mmu);
-            self.mmu.increment_counters(cycles_ellapsed as i32);
-            self.gpu.step(cycles_ellapsed as i32);
+    pub fn step(&mut self) -> Option<RgbaImage> {
+        let mut frame = None;
+        let mut cycles = 0;
+        while cycles < CYCLES_PER_SECOND {
+            let step_cycles = self.cpu.step(&mut self.mmu);
+            self.mmu.increment_counters(step_cycles as i32);
             isr(&mut self.cpu, &mut self.mmu);
+            frame = self.gpu.step(&mut self.mmu, step_cycles as i32);
+            cycles += step_cycles as i32;
         }
+        frame
     }
 }
