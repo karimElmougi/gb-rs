@@ -41,14 +41,18 @@ pub fn isr(cpu: &mut CPU, mmu: &mut MMU) {
     }
 }
 
+pub fn write_interrupt(mmu: &mut MMU, interrupt_signal: InterruptFlag) {
+    let flags = mmu.read_byte(INTERRUPT_FLAG_ADDR);
+    mmu.write_byte(INTERRUPT_FLAG_ADDR, flags | (interrupt_signal as u8));
+}
+
 fn service_interrupt(cpu: &mut CPU, mmu: &mut MMU, interrupt_signal: InterruptFlag) {
     cpu.is_halted = false;
     if !cpu.interrupts_enabled && cpu.is_halted {
         return;
     }
     cpu.interrupts_enabled = false;
-    let mut flags = mmu.read_byte(INTERRUPT_FLAG_ADDR);
-    flags &= !(interrupt_signal as u8);
+    let flags = mmu.read_byte(INTERRUPT_FLAG_ADDR) & !(interrupt_signal as u8);
     mmu.write_byte(INTERRUPT_FLAG_ADDR, flags);
     let addr = match interrupt_signal {
         InterruptFlag::VBLANK => 0x40,

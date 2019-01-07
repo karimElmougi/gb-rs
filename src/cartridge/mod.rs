@@ -17,12 +17,10 @@ pub fn new(rom_name: &str) -> Box<Cartridge> {
         .expect("Could not read ROM file")
         .read_to_end(&mut rom);
 
-    println!("Size of the ROM: {}", rom.len());
-
     match rom[0x147] {
         0x00 => Box::new(mbc0::new(rom)),
         0x01...0x03 => Box::new(mbc1::new(rom)),
         0x08...0x0d => Box::new(mbc0::new(rom)),
-        _ => Box::new(mbc0::new(vec![0; 10])),
+        _ => panic!("Unsupported cartridge type"),
     }
 }
