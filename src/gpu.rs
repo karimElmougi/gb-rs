@@ -1,8 +1,10 @@
 use crate::interrupts::write_interrupt;
 use crate::interrupts::InterruptFlag;
 use crate::mmu::MMU;
-use image::Rgba;
-use image::RgbaImage;
+use sdl2::pixels::Color;
+use sdl2::render::Canvas;
+use sdl2::video::Window;
+use sdl2::rect::Point;
 
 pub const SCREEN_WIDTH: u32 = 160;
 pub const SCREEN_HEIGHT: u32 = 144;
@@ -11,19 +13,11 @@ const GPU_CTRL_ADDR: u16 = 0xff40;
 const LCD_STATUS_ADDR: u16 = 0xff41;
 const SCANLINE_ADDR: u16 = 0xff44;
 
-const PALETTE: [Rgba<u8>; 4] = [
-    Rgba {
-        data: [255, 255, 255, 255],
-    },
-    Rgba {
-        data: [192, 192, 192, 255],
-    },
-    Rgba {
-        data: [96, 96, 96, 255],
-    },
-    Rgba {
-        data: [0, 0, 0, 255],
-    },
+const PALETTE: [Color; 4] = [
+        Color {r: 255, g: 255, b: 255, a: 255},
+        Color {r: 192, g: 192, b: 192, a: 255},
+        Color {r: 96, g: 96, b: 96, a: 255},
+        Color {r: 0, g: 0, b: 0, a: 255},
 ];
 
 #[derive(Copy, Clone, PartialEq)]
@@ -48,23 +42,25 @@ impl GPUMode {
 
 pub struct GPU {
     clock: i32,
-    framebuffer: RgbaImage,
+    points: [Vec<Point>; 4],
+    canvas: Canvas<Window>,
 }
 
-pub fn new() -> GPU {
+pub fn new(canvas: Canvas<Window>) -> GPU {
     GPU {
         clock: 456,
-        framebuffer: image::ImageBuffer::new(SCREEN_WIDTH, SCREEN_HEIGHT),
+        points: [vec![], vec![], vec![], vec![]],
+        canvas,
     }
 }
 
 impl GPU {
-    pub fn step(&mut self, mmu: &mut MMU, cycles: i32) -> Option<RgbaImage> {
+    pub fn step(&mut self, mmu: &mut MMU, cycles: i32) {
         if !is_lcd_on(mmu) {
             self.clock = 456;
             mmu.write_byte(SCANLINE_ADDR, 0);
             set_mode(mmu, GPUMode::HBLANK);
-            return None;
+            return;
         }
 
         let scanline = mmu.read_byte(SCANLINE_ADDR);
@@ -97,7 +93,6 @@ impl GPU {
             reset_coincidence_status(mmu);
         }
 
-        let mut frame = None;
         self.clock -= cycles;
         if self.clock <= 0 {
             self.clock += 456;
@@ -106,15 +101,18 @@ impl GPU {
             if scanline == 144 {
                 write_interrupt(mmu, InterruptFlag::VBLANK);
             } else if scanline > 153 {
-                frame = Some(self.framebuffer.clone());
+                for (i, v) in self.points.iter_mut().enumerate() {
+                    self.canvas.set_draw_color(PALETTE[i]);
+                    self.canvas.draw_points(&v[..]).unwrap();
+                    v.clear();
+                }
+                self.canvas.present();
                 mmu.write_byte(SCANLINE_ADDR, 0);
                 self.render_scanline(mmu, 0);
             } else if scanline < 144 {
                 self.render_scanline(mmu, scanline);
             }
         }
-
-        frame
     }
 
     fn render_scanline(&mut self, mmu: &mut MMU, current_line: u8) {
@@ -181,11 +179,10 @@ impl GPU {
             let data1 = mmu.memory[(tile_location + line) as usize];
             let data2 = mmu.memory[(tile_location + line + 1) as usize];
 
-            let colour_bit = (((x_pos % 8 - 7) as i8) * -1) as u8;
-            let colour_num = (((data2 >> colour_bit) & 1) << 1) | ((data1 >> colour_bit) & 1);
-            let colour = get_colour(mmu, colour_num, 0xff47);
-            self.framebuffer
-                .put_pixel(pixel as u32, current_line as u32, colour);
+            let color_bit = (((x_pos % 8 - 7) as i8) * -1) as u8;
+            let color_num = (((data2 >> color_bit) & 1) << 1) | ((data1 >> color_bit) & 1);
+            let i = get_color(mmu, color_num, 0xff47);
+            self.points[i].push(Point::new(pixel as i32, current_line as i32));
         }
     }
 
@@ -214,30 +211,29 @@ impl GPU {
             let data2 = mmu.read_byte(data_addr + 1);
 
             for tile in 0..8 {
-                let colour_bit = if attributes & 0x20 == 0x20 {
+                let color_bit = if attributes & 0x20 == 0x20 {
                     (-((tile - 7) as i8)) as u8
                 } else {
                     tile
                 };
-                let colour_num = (((data2 >> colour_bit) & 1) << 1) | ((data1 >> colour_bit) & 1);
+                let color_num = (((data2 >> color_bit) & 1) << 1) | ((data1 >> color_bit) & 1);
 
-                if colour_num == 0 {
+                if color_num == 0 {
                     continue;
                 }
 
                 let pixel = x_pos as u32 + (7 - tile) as u32;
                 if pixel < 160 {
                     let priority = attributes & 0x80 != 0x80;
-                    let bg_tile_colour = *self.framebuffer.get_pixel(pixel, current_line as u32);
-                    if priority || bg_tile_colour == PALETTE[0] {
+                    let background_is_white = self.points[0].contains(&Point::new(pixel as i32, current_line as i32));
+                    if priority || background_is_white {
                         let palette_addr = if attributes & 0x10 == 0x10 {
                             0xff49
                         } else {
                             0xff49
                         };
-                        let colour = get_colour(mmu, colour_num, palette_addr);
-                        self.framebuffer
-                            .put_pixel(pixel, current_line as u32, colour);
+                        let i = get_color(mmu, color_num, palette_addr);
+                        self.points[i].push(Point::new(pixel as i32, current_line as i32));
                     }
                 }
             }
@@ -282,7 +278,7 @@ fn is_lcd_on(mmu: &MMU) -> bool {
     mmu.read_byte(GPU_CTRL_ADDR) & 0x80 == 0x80
 }
 
-fn get_colour(mmu: &MMU, colour_num: u8, addr: u16) -> Rgba<u8> {
+fn get_color(mmu: &MMU, colour_num: u8, addr: u16) -> usize {
     let custom_palette = mmu.read_byte(addr);
     let i = match colour_num {
         0 => custom_palette & 0x02 | custom_palette & 0x01,
@@ -291,5 +287,5 @@ fn get_colour(mmu: &MMU, colour_num: u8, addr: u16) -> Rgba<u8> {
         3 => ((custom_palette & 0x80) >> 6) | ((custom_palette & 0x40) >> 6),
         _ => panic!("Invalid colour value: {}", colour_num),
     };
-    PALETTE[i as usize]
+    i as usize
 }

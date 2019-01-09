@@ -1,19 +1,19 @@
 mod cartridge;
 mod cpu;
-mod gameboy;
 mod gpu;
 mod instructions;
 mod interrupts;
 mod mmu;
 mod registers;
 
-extern crate image;
-extern crate piston_window;
+extern crate sdl2;
 
-use piston_window::*;
+use crate::interrupts::isr;
+
+const CYCLES_PER_SECOND: i32 = 4194304 / 60;
 
 fn main() {
-    let rom_name = "cpu_instrs\\cpu_instrs.gb";
+    let rom_name = "Pokemon Red.gb";
     // let rom_name = "cpu_instrs\\individual\\01-special.gb";
     // let rom_name = "cpu_instrs\\individual\\02-interrupts.gb";
     // let rom_name = "cpu_instrs\\individual\\03-op sp,hl.gb";
@@ -24,32 +24,29 @@ fn main() {
     // let rom_name = "cpu_instrs\\individual\\08-misc instrs.gb";
     // let rom_name = "cpu_instrs\\individual\\09-op r,r.gb";
     // let rom_name = "cpu_instrs\\individual\\10-bit ops.gb";
-    let mut gb = gameboy::new(rom_name);
+    
+    let ctx = sdl2::init().unwrap();
+    let video_ctx = ctx.video().unwrap();
+    let window = video_ctx.window("gb-rs", gpu::SCREEN_WIDTH, gpu::SCREEN_HEIGHT).position_centered().opengl().build();
+    let window = match window {
+        Ok(window) => window,
+        Err(err) => panic!("failed to create window: {}", err)
+    };
 
-    let scale = 2;
+    let canvas = window.into_canvas().build().unwrap();
 
-    let (width, height) = (scale * gpu::SCREEN_WIDTH, scale * gpu::SCREEN_HEIGHT);
-    let mut window: PistonWindow = WindowSettings::new("gb_rs", (width, height))
-        .exit_on_esc(true)
-        .opengl(OpenGL::V3_2)
-        .build()
-        .unwrap();
-
-    let mut canvas = image::ImageBuffer::new(width, height);
-    let mut texture: G2dTexture =
-        Texture::from_image(&mut window.factory, &canvas, &TextureSettings::new()).unwrap();
-
-    while let Some(e) = window.next() {
-        if let Some(img) = gb.step() {
-            canvas = img;
+    let mut mmu = mmu::new(cartridge::new(rom_name));
+    let mut cpu = cpu::new();
+    let mut gpu = gpu::new(canvas);
+    loop {
+        let mut cycles = 0;
+        while cycles < CYCLES_PER_SECOND {
+            let step_cycles = cpu.step(&mut mmu);
+            mmu.increment_counters(step_cycles as i32);
+            isr(&mut cpu, &mut mmu);
+            gpu.step(&mut mmu, step_cycles as i32);
+            cycles += step_cycles as i32;
         }
-
-        if let Some(_) = e.render_args() {
-            texture.update(&mut window.encoder, &canvas).unwrap();
-            window.draw_2d(&e, |c, g| {
-                clear([1.0; 4], g);
-                image(&texture, c.transform, g);
-            });
-        }
+        std::thread::sleep(std::time::Duration::from_micros(16666));
     }
 }
