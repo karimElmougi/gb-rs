@@ -1,5 +1,6 @@
 mod mbc0;
 mod mbc1;
+mod mbc3;
 
 use std::fs::File;
 use std::io::Read;
@@ -21,6 +22,7 @@ pub fn new(rom_name: &str) -> Box<Cartridge> {
         0x00 => Box::new(mbc0::new(rom)),
         0x01...0x03 => Box::new(mbc1::new(rom)),
         0x08...0x0d => Box::new(mbc0::new(rom)),
+        0x0f...0x13 => Box::new(mbc3::new(rom)),
         _ => panic!("Unsupported cartridge type"),
     }
 }
