@@ -1,9 +1,10 @@
 [package]
-name = "gb_rs"
+name = "gb-rs"
 version = "0.1.0"
 authors = ["karimElmougi"]
 edition = "2018"
 
-[dependencies.sdl2]
-version = "0.32.1"
-features = ["bundled"]
+[dependencies]
+image = "0.20.1"
+piston = "0.39.0"
+piston_window = "0.85.0"

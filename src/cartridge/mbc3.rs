@@ -56,7 +56,7 @@ impl Cartridge for MBC3 {
                 if self.rom_bank == 0 {
                     self.rom_bank = 1;
                 }
-            },
+            }
             0x4000...0x5fff => self.ram_bank = value as usize & 0x03,
             _ => {}
         };
