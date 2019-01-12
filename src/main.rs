@@ -13,13 +13,13 @@ extern crate piston_window;
 use img::ImageBuffer;
 use piston::event_loop::EventLoop;
 use piston_window::{
-    clear, image, Filter, OpenGL, PistonWindow, RenderEvent, Texture, TextureSettings,
+    image, Filter, OpenGL, PistonWindow, RenderEvent, Texture, TextureSettings,
     WindowSettings,
 };
 
 use crate::interrupts::isr;
 
-const CYCLES_PER_SECOND: i32 = 4194304 / 60;
+const CYCLES_PER_RENDER: i32 = 4194304 / 60;
 
 fn main() {
     let rom_name = "Pokemon Red.gb";
@@ -56,21 +56,20 @@ fn main() {
     let mut texture = Texture::from_image(&mut window.factory, &frame, &texture_settings).unwrap();
 
     while let Some(e) = window.next() {
-        let mut cycles = 0;
-        while cycles < CYCLES_PER_SECOND {
-            let step_cycles = cpu.step(&mut mmu);
-            mmu.increment_counters(step_cycles as i32);
-            isr(&mut cpu, &mut mmu);
-            if let Some(img) = gpu.step(&mut mmu, step_cycles as i32) {
-                frame = img;
-            }
-            cycles += step_cycles as i32;
-        }
-
         if let Some(_) = e.render_args() {
+            let mut cycles = 0;
+            while cycles < CYCLES_PER_RENDER {
+                let step_cycles = cpu.step(&mut mmu);
+                mmu.increment_counters(step_cycles as i32);
+                isr(&mut cpu, &mut mmu);
+                if let Some(img) = gpu.step(&mut mmu, step_cycles as i32) {
+                    frame = img;
+                }
+                cycles += step_cycles as i32;
+            }
+
             texture.update(&mut window.encoder, &frame).unwrap();
             window.draw_2d(&e, |c, g| {
-                clear([1.0; 4], g);
                 image(&texture, c.transform, g);
             });
         }

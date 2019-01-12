@@ -68,20 +68,20 @@ impl GPU {
 
         let scanline = mmu.read_byte(SCANLINE_ADDR);
         let previous_mode = get_mode(mmu);
-        let mut request_interrupt = false;
 
-        if scanline >= 144 {
+        let request_interrupt = if scanline >= 144 {
             set_mode(mmu, GPUMode::VBLANK);
-            request_interrupt = is_vblank_mode_interrupt_enabled(mmu);
+            is_vblank_mode_interrupt_enabled(mmu)
         } else if self.clock >= 456 - 80 {
             set_mode(mmu, GPUMode::OAM);
-            request_interrupt = is_oam_mode_interrupt_enabled(mmu);
+            is_oam_mode_interrupt_enabled(mmu)
         } else if self.clock >= 456 - 80 - 172 {
             set_mode(mmu, GPUMode::VRAM);
+            false
         } else {
             set_mode(mmu, GPUMode::HBLANK);
-            request_interrupt = is_hblank_mode_interrupt_enabled(mmu);
-        }
+            is_hblank_mode_interrupt_enabled(mmu)
+        };
 
         if request_interrupt && get_mode(mmu) != previous_mode {
             write_interrupt(mmu, InterruptFlag::LCD);
@@ -100,8 +100,9 @@ impl GPU {
         self.clock -= cycles;
         if self.clock <= 0 {
             self.clock += 456;
-            mmu.memory[SCANLINE_ADDR as usize] += 1;
-            let scanline = mmu.read_byte(SCANLINE_ADDR);
+            let scanline = &mut mmu.memory[SCANLINE_ADDR as usize];
+            *scanline += 1;
+            let scanline = *scanline;
             if scanline == 144 {
                 write_interrupt(mmu, InterruptFlag::VBLANK);
             } else if scanline > 153 {
@@ -143,7 +144,7 @@ impl GPU {
             (0x8800, false)
         };
 
-        let test_mask = 0x08u8 | if using_window { 0x40 } else { 0 };
+        let test_mask = if using_window { 0x40 } else { 0x08 };
 
         let background_mem = if control & test_mask == test_mask {
             0x9c00
@@ -151,15 +152,15 @@ impl GPU {
             0x9800
         };
 
-        let y_pos = if !using_window {
-            scroll_y + current_line
-        } else {
+        let y_pos = if using_window {
             current_line - window_y
+        } else {
+            scroll_y + current_line
         };
 
         let tile_row = (y_pos / 8) as u16 * 32;
 
-        for pixel in 0..160 {
+        for pixel in 0..(SCREEN_WIDTH as u8) {
             let x_pos = if using_window && pixel >= window_x {
                 pixel - window_x
             } else {
@@ -169,17 +170,17 @@ impl GPU {
             let tile_col = (x_pos / 8) as u16;
             let tile_addr = background_mem + tile_row + tile_col;
             let tile_location = if unsig {
-                tile_data + (mmu.memory[tile_addr as usize] as u16) * 16
+                tile_data + 16 * (mmu.memory[tile_addr as usize] as u16)
             } else {
-                let tile_num = (mmu.memory[tile_addr as usize] as i8) as u16;
-                (tile_data as i32 + ((tile_num + 128) * 16) as i32) as u16
+                let tile_num = (mmu.memory[tile_addr as usize] as i8) as i16;
+                (tile_data as i32 + (16 * (tile_num + 128)) as i32) as u16
             };
 
-            let line = ((y_pos % 8) * 2) as u16;
+            let line = (2 * (y_pos % 8)) as u16;
             let data1 = mmu.memory[(tile_location + line) as usize];
             let data2 = mmu.memory[(tile_location + line + 1) as usize];
 
-            let color_bit = (((x_pos % 8 - 7) as i8) * -1) as u8;
+            let color_bit = ((((x_pos % 8) - 7) as i8) * -1) as u8;
             let color_num = (((data2 >> color_bit) & 1) << 1) | ((data1 >> color_bit) & 1);
             let color = get_color(mmu, color_num, 0xff47);
             self.framebuffer
@@ -188,6 +189,7 @@ impl GPU {
     }
 
     fn render_sprites(&mut self, mmu: &MMU, control: u8, current_line: u8) {
+        let current_line = current_line as i32;
         let y_size = if control & 0x04 == 0x04 { 16 } else { 8 };
 
         for sprite in 0..40 {
@@ -197,17 +199,17 @@ impl GPU {
             let tile_location = mmu.read_byte(0xfe00 + index + 2);
             let attributes = mmu.read_byte(0xfe00 + index + 3);
 
-            if (current_line as i32) < y_pos || current_line as i32 >= (y_pos + y_size) {
+            if current_line < y_pos || current_line >= (y_pos + y_size) {
                 continue;
             }
 
             let line = if attributes & 0x40 == 0x40 {
-                -((current_line as i32 - y_pos) - y_size)
+                -((current_line - y_pos) - y_size)
             } else {
-                current_line as i32 - y_pos
+                current_line - y_pos
             };
 
-            let data_addr = 16 * tile_location as u16 + 2 * line as u16 + 0x8000;
+            let data_addr = 16 * (tile_location as u16) + (2 * line) as u16 + 0x8000;
             let data1 = mmu.read_byte(data_addr);
             let data2 = mmu.read_byte(data_addr + 1);
 
@@ -217,6 +219,7 @@ impl GPU {
                 } else {
                     tile
                 };
+
                 let color_num = (((data2 >> color_bit) & 1) << 1) | ((data1 >> color_bit) & 1);
 
                 if color_num == 0 {
@@ -232,7 +235,7 @@ impl GPU {
                         let palette_addr = if attributes & 0x10 == 0x10 {
                             0xff49
                         } else {
-                            0xff49
+                            0xff48
                         };
                         let color = get_color(mmu, color_num, palette_addr);
                         self.framebuffer
